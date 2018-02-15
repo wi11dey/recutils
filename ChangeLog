@@ -1,3 +1,8 @@
+2018-02-15  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* utils/recutl.c (recutl_write_db_to_file): Do not use the current
+	directory to hold temporary files.
+
 2017-01-31  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* README-dev: Correct typo.

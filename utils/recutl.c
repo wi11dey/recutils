@@ -47,6 +47,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <getpass.h>
+#include <tmpdir.h>
+#include <pathmax.h>
 
 #include <rec.h>
 #include <recutl.h>
@@ -389,7 +391,7 @@ recutl_write_db_to_file (rec_db_t db,
                          char *file_name)
 {
   FILE *out;
-  char tmp_file_name[10]="recXXXXXX";
+  char tmp_file_name[PATH_MAX];
   rec_writer_t writer;
   int des;
   struct stat st1;
@@ -405,11 +407,11 @@ recutl_write_db_to_file (rec_db_t db,
       stat_result = stat (file_name, &st1);
 
       /* Create a temporary file with the results. */
-      des = mkstemp (tmp_file_name);
-      if (des == -1)
-        {
-          recutl_fatal (_("cannot create a unique name.\n"));
-        }
+      if ((path_search (tmp_file_name, PATH_MAX, NULL,
+                        "rec", true) == -1)
+          || ((des = mkstemp (tmp_file_name)) == -1))
+        recutl_fatal (_("cannot create a unique name.\n"));
+
       out = fdopen (des, "w+");
     }
 
