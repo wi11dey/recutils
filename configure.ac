@@ -22,7 +22,7 @@ AC_INIT([GNU recutils], [1.7], [bug-recutils@gnu.org])
 
 dnl Must come before AM_INIT_AUTOMAKE
 AC_CONFIG_AUX_DIR([build-aux])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_HEADERS(src/config.h)
 AC_CONFIG_MACRO_DIR([m4])
 
