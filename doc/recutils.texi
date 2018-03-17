@@ -32,7 +32,7 @@
 This manual is for GNU recutils (version @value{VERSION},
 @value{UPDATED}).
 
-Copyright @copyright{} 2009-2015 Jose E. Marchesi
+Copyright @copyright{} 2009-2018 Jose E. Marchesi
 
 Copyright @copyright{} 1994-2014 Free Software Foundation, Inc.
 
@@ -4786,7 +4786,7 @@ commands with your bash.  This is very easy using the @command{enable}
 bash command.  The registering command for readrec would be:
 
 @example
-$ enable readrec.so readrec
+$ enable -f readrec.so readrec
 @end example
 
 @menu

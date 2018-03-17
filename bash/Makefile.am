@@ -1,7 +1,7 @@
 # bash/Makefile.am
 # GNU recutils
 
-# Copyright (C) 2013-2015 Jose E. Marchesi
+# Copyright (C) 2013-2018 Jose E. Marchesi
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
 if BASH_BUILTINS
 
 COMMON_CPPFLAGS = -I$(top_srcdir)/src -DHAVE_CONFIG_H \
-                  -I$(BASH_HEADERS) -I$(BASH_HEADERS)/lib -I$(BASH_HEADERS)/builtins
+                  -I$(BASH_HEADERS) -I$(BASH_HEADERS)/lib -I$(BASH_HEADERS)/builtins \
+                  -I$(BASH_HEADERS)/include
 
 lib_LTLIBRARIES = readrec.la testrec.la
 
