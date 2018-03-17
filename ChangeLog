@@ -1,5 +1,10 @@
 2018-03-17  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* bash/readrec.c (readrec_builtin): Immediately return EX_USAGE if
+	no_options returns != 0.  Fixes readrec --help.
+
+2018-03-17  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* utils/recutl.c (recutl_print_version): Update copyright years.
 	* bash/readrec.c: Include config.h.
 	* bash/Makefile.am (COMMON_CPPFLAGS): Include the builddir lib.

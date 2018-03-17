@@ -53,7 +53,8 @@ readrec_builtin (WORD_LIST *list)
   rec_parser_t parser;
   rec_record_t record;
 
-  no_options (list);
+  if (no_options (list) != 0)
+    return EX_USAGE;
 
   /* Create a librec parser to operate on the standard input and try
      to read a record.  If there is a parse error then report it and
@@ -135,11 +136,11 @@ readrec_builtin (WORD_LIST *list)
 char *readrec_doc[] = {
   "Read a recutils record from the standard input.",
   "",
-  "The read record is stored in the REPLY_REC variable.  Additional variables\n\
-are set named after the fields in the record.\n\
-\n\
-Exit Status:\n\
-The return code is zero, unless end-of-file is encountered.\n",
+  "The read record is stored in the REPLY_REC variable.  Additional variables",
+  "are set named after the fields in the record.",
+  "",
+  "Exit Status:",
+  "The return code is zero, unless end-of-file is encountered.",
   (char *) NULL
 };
 
