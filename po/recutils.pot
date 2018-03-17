@@ -1,0 +1,364 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# This file is distributed under the same license as the GNU recutils package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GNU recutils 1.7.90\n"
+"Report-Msgid-Bugs-To: bug-gnu-utils@gnu.org\n"
+"POT-Creation-Date: 2018-03-17 14:46+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/rec-utils.c:93
+#, c-format
+msgid "internal error: rec_int_rec_extract_file: error compiling regexp.\n"
+msgstr ""
+
+#: src/rec-utils.c:121 src/rec-utils.c:150
+#, c-format
+msgid "internal error: rec_int_rec_extract_url: error compiling regexp.\n"
+msgstr ""
+
+#: src/rec-utils.c:304
+#, c-format
+msgid "internal error: rec_match: error compiling regexp.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, csv2rec synopsis.
+#. no-wrap
+#: utils/csv2rec.c:105
+#, c-format
+msgid "Usage: csv2rec [OPTIONS]... [CSV_FILE]\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, csv2rec short description.
+#. no-wrap
+#: utils/csv2rec.c:110
+msgid "Convert csv data into rec data.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, csv2rec options.
+#. no-wrap
+#: utils/csv2rec.c:116
+msgid ""
+"  -t, --type=TYPE                     type name for the converted records; "
+"if this\n"
+"                                        parameter is ommited then no type is "
+"used.\n"
+"  -s, --strict                        be strict parsing the csv file.\n"
+"  -e, --omit-empty                    omit empty fields.\n"
+msgstr ""
+
+#: utils/csv2rec.c:230
+#, c-format
+msgid "invalid field name '%s' in header\n"
+msgstr ""
+
+#: utils/csv2rec.c:259
+#, c-format
+msgid ""
+"%s: %lu: this line contains %lu fields, but %lu header fields were read\n"
+msgstr ""
+
+#: utils/csv2rec.c:347 utils/recdel.c:266
+#, c-format
+msgid "cannot read file %s\n"
+msgstr ""
+
+#: utils/csv2rec.c:358
+msgid "failed to initialize csv parser\n"
+msgstr ""
+
+#: utils/csv2rec.c:376
+#, c-format
+msgid "error while parsing CSV file: %s\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, mdb2rec synopsis.
+#. no-wrap
+#: utils/mdb2rec.c:103
+#, c-format
+msgid "Usage: mdb2rec [OPTIONS]... MDB_FILE [TABLE]\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, mdb2rec short description.
+#. no-wrap
+#: utils/mdb2rec.c:108
+msgid "Convert an mdb file into a rec file.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, mdb2rec options.
+#. no-wrap
+#: utils/mdb2rec.c:114
+msgid ""
+"  -s, --system-tables                 include system tables.\n"
+"  -e, --keep-empty-fields             don't prune empty fields in the rec\n"
+"                                        output.\n"
+"  -l, --list-tables                   dump a list of the table names "
+"contained\n"
+"                                        in the mdb file.\n"
+msgstr ""
+
+#: utils/mdb2rec.c:251 utils/mdb2rec.c:315
+#, c-format
+msgid "failed to normalise record type name %s\n"
+msgstr ""
+
+#: utils/mdb2rec.c:259 utils/mdb2rec.c:270
+#, c-format
+msgid "failed to normalise field name %s\n"
+msgstr ""
+
+#: utils/mdb2rec.c:336
+#, c-format
+msgid "failed to normalise the field name %s\n"
+msgstr ""
+
+#: utils/mdb2rec.c:443
+#, c-format
+msgid "invalid field name %s.\n"
+msgstr ""
+
+#: utils/mdb2rec.c:482
+#, c-format
+msgid "could not open file %s\n"
+msgstr ""
+
+#: utils/mdb2rec.c:489
+msgid "file does not appear to be an Access database\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, rec2csv synopsis.
+#. no-wrap
+#: utils/rec2csv.c:86
+#, c-format
+msgid "Usage: rec2csv [OPTIONS]... [REC_FILE]\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, rec2csv short description.
+#. no-wrap
+#: utils/rec2csv.c:91
+msgid "Convert rec data into csv data.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, rec2csv options.
+#. no-wrap
+#: utils/rec2csv.c:97
+msgid ""
+"  -d, --delim=char                    sets the deliminator (default ',')\n"
+"  -t, --type=TYPE                     record set to convert to csv; if this "
+"parameter\n"
+"                                        is omitted then the default record "
+"set is used\n"
+"  -S, --sort=FIELDS                   sort the output by the specified "
+"fields.\n"
+msgstr ""
+
+#: utils/rec2csv.c:142
+msgid "only one list of fields can be specified as a sorting criteria.\n"
+msgstr ""
+
+#: utils/rec2csv.c:149
+msgid "invalid field name list in -S.\n"
+msgstr ""
+
+#: utils/rec2csv.c:155
+msgid "internal error creating fex.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, recdel synopsis.
+#. no-wrap
+#: utils/recdel.c:89
+#, c-format
+msgid ""
+"Usage: recdel [OPTIONS]... [-t TYPE] [-n NUM | -e RECORD_EXPR | -q STR | -m "
+"NUM] [FILE]\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, recdel short description.
+#. no-wrap
+#: utils/recdel.c:94
+msgid "Remove (or comment out) records from a rec file.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, recdel arguments.
+#. no-wrap
+#: utils/recdel.c:101
+msgid ""
+"  -c, --comment                       comment out the matching records "
+"instead of\n"
+"                                        deleting them.\n"
+"      --force                         delete even in potentially dangerous "
+"situations,\n"
+"                                        and if the deletion is violating "
+"record restrictions.\n"
+"      --no-external                   don't use external descriptors.\n"
+"      --verbose                       give a detailed report if the "
+"integrity check\n"
+"                                        fails.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, notes on recdel.
+#. no-wrap
+#. TRANSLATORS: --help output, notes on recfix.
+#. no-wrap
+#: utils/recdel.c:119 utils/recfix.c:167
+msgid ""
+"If no FILE is specified then the command acts like a filter, getting\n"
+"the data from standard input and writing the result to standard output.\n"
+msgstr ""
+
+#: utils/recdel.c:136
+#, c-format
+msgid "no records of type %s found.\n"
+msgstr ""
+
+#: utils/recdel.c:227
+#, c-format
+msgid "ignoring a request to delete all records of type %s.\n"
+msgstr ""
+
+#: utils/recdel.c:229
+msgid "use --force if you really want to proceed, or use either -n or -e.\n"
+msgstr ""
+
+#: utils/recdel.c:237
+msgid "invalid selection expression.\n"
+msgstr ""
+
+#: utils/recdel.c:276 utils/recfix.c:407
+#, c-format
+msgid "file %s is not writable.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, recfix synopsis.
+#. no-wrap
+#: utils/recfix.c:117
+#, c-format
+msgid "Usage: recfix [OPTION]... [OPERATION] [OP_OPTION]... [FILE]\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, recfix short description.
+#. no-wrap
+#: utils/recfix.c:122
+msgid "Check and fix rec files.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, recfix global arguments.
+#. no-wrap
+#: utils/recfix.c:129
+msgid ""
+"      --no-external                   don't use external descriptors.\n"
+"      --force                         force the requested operation.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, recfix operations.
+#. no-wrap
+#: utils/recfix.c:139
+msgid ""
+"Operations:\n"
+"      --check                         check integrity of the specified "
+"file.  Default.\n"
+"      --sort                          sort the records in the specified "
+"file.\n"
+"      --auto                          insert auto-generated fields in "
+"records missing them.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, recfix operations related with encryption.
+#. no-wrap
+#: utils/recfix.c:149
+msgid ""
+"      --encrypt                       encrypt confidential fields in the "
+"specified file.\n"
+"      --decrypt                       decrypt confidential fields in the "
+"specified file.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, recfix encryption and decryption
+#. options.
+#. no-wrap
+#: utils/recfix.c:158
+msgid ""
+"De/Encryption options:\n"
+"  -s, --password=PASSWORD             encrypt/decrypt with this password.\n"
+msgstr ""
+
+#: utils/recfix.c:208
+msgid "--password|-s must be used as an operation argument.\n"
+msgstr ""
+
+#: utils/recfix.c:214
+msgid "the specified operation does not require a password.\n"
+msgstr ""
+
+#: utils/recfix.c:219
+msgid "please specify just one password.\n"
+msgstr ""
+
+#: utils/recfix.c:230 utils/recfix.c:240 utils/recfix.c:250 utils/recfix.c:261
+#: utils/recfix.c:271
+msgid "please specify just one operation.\n"
+msgstr ""
+
+#: utils/recfix.c:463
+msgid "the database contains already encrypted fields\n"
+msgstr ""
+
+#: utils/recfix.c:464
+msgid "please use --force or --decrypt\n"
+msgstr ""
+
+#: utils/recfix.c:574
+msgid "unknown operation in recfix: please report this as a bug.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, recfmt synopsis.
+#. no-wrap
+#: utils/recfmt.c:78
+#, c-format
+msgid "Usage: recfmt [OPTION]... [TEMPLATE]\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, recfmt arguments.
+#. no-wrap
+#: utils/recfmt.c:83
+msgid "Apply a template to records read from standard input.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, recfmt arguments.
+#. no-wrap
+#: utils/recfmt.c:89
+msgid ""
+"  -f, --file=FILENAME                 read the template to apply from a "
+"file.\n"
+msgstr ""
+
+#: utils/recfmt.c:123
+#, c-format
+msgid "can't open file %s for reading.\n"
+msgstr ""
+
+#: utils/recfmt.c:141
+msgid "don't specify a template in the command line and -f at the same time.\n"
+msgstr ""
+
+#: utils/recfmt.c:164
+msgid "invalid expression in a template slot.\n"
+msgstr ""
+
+#: utils/recfmt.c:170
+msgid "error evaluating expression in a template slot.\n"
+msgstr ""
+
+#: utils/recfmt.c:204
+msgid "recfmt_apply_template: error compiling regexp. Please report this.\n"
+msgstr ""
