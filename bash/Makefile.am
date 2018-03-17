@@ -18,7 +18,8 @@
 
 if BASH_BUILTINS
 
-COMMON_CPPFLAGS = -I$(top_srcdir)/src -DHAVE_CONFIG_H \
+COMMON_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib \
+                  -I$(top_srcdir)/src -DHAVE_CONFIG_H \
                   -I$(BASH_HEADERS) -I$(BASH_HEADERS)/lib -I$(BASH_HEADERS)/builtins \
                   -I$(BASH_HEADERS)/include
 

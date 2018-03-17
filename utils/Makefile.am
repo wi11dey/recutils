@@ -37,7 +37,8 @@ if USE_COVERAGE
   AM_CFLAGS += -fprofile-arcs -ftest-coverage
 endif
 
-AM_CPPFLAGS = -I$(top_srcdir)/lib -I$(top_srcdir)/src \
+AM_CPPFLAGS = -I$(top_builddir)/lib \
+              -I$(top_srcdir)/lib -I$(top_srcdir)/src \
               -I$(top_srcdir)/libcsv -DLOCALEDIR=\"$(localedir)\" \
               -DMDB_DATETIME=$(MDB_DATETIME)
 

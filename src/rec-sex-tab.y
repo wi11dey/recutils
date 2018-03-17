@@ -24,7 +24,7 @@
  */
 
 %pure-parser
-%name-prefix="sex"
+%name-prefix "sex"
 %parse-param {rec_sex_parser_t sex_parser}
 %lex-param { void *scanner }
 
