@@ -1,4 +1,4 @@
-/* -*- mode: C -*- Time-stamp: "2015-04-27 19:42:33 jemarch"
+/* -*- mode: C -*- Time-stamp: "2018-03-17 13:19:27 jemarch"
  *
  *       File:         testrec.c
  *       Date:         Fri Aug 23 21:41:00 2013
@@ -22,6 +22,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <config.h>
 
 #include <bash/config.h>
 #include <unistd.h>
