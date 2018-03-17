@@ -3,7 +3,7 @@ dnl
 dnl Please process this file with autoconf to get a 'configure'
 dnl script.
 
-dnl Copyright (C) 2009-2015 Jose E. Marchesi
+dnl Copyright (C) 2009-2018 Jose E. Marchesi
 
 dnl This program is free software: you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([GNU recutils], [1.7], [bug-recutils@gnu.org])
+AC_INIT([GNU recutils], [1.8], [bug-recutils@gnu.org])
 
 dnl Must come before AM_INIT_AUTOMAKE
 AC_CONFIG_AUX_DIR([build-aux])
