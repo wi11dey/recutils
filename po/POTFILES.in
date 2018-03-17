@@ -1,1 +1,10 @@
 # List of source files which contain translatable strings.
+src/rec-utils.c
+utils/csv2rec.c
+utils/mdb2rec.c
+utils/rec2csv.c
+utils/recdel.c
+utils/recfix.c
+utils/recfmt.c
+bash/readrec.c
+bash/testrec.c
