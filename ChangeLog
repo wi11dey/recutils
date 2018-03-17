@@ -1,3 +1,12 @@
+2018-03-17  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* m4/iconv.m4: Upgrade to gettext-0.19.8.1.
+	* m4/lib-ld.m4: Upgrade to gettext-0.19.8.1.
+	* m4/lib-link.m4: Upgrade to gettext-0.19.8.1.
+	* m4/lib-prefix.m4: Upgrade to gettext-0.19.8.1.
+	* m4/progtest.m4: Upgrade to gettext-0.19.8.1.
+	* configure.ac (AM_GNU_GETTEXT_VERSION): Bump to 0.19.8.
+
 2018-03-17  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/Makefile.am (AM_CPPFLAGS): Include the builddir lib.

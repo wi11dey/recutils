@@ -203,7 +203,7 @@ case "${host}" in
 esac
 
 dnl i18n with gettext
-AM_GNU_GETTEXT_VERSION([0.18.1])
+AM_GNU_GETTEXT_VERSION([0.19.8])
 AM_GNU_GETTEXT([external])
 
 dnl gcov compilation
