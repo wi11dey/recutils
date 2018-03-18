@@ -363,10 +363,7 @@ rec_aggregate_std_avg_record (rec_record_t record,
      will be returned by this function below to signal the              \
      end-of-memory condition.  */                                       \
                                                                         \
-  if (val == floor (val))                                               \
-      asprintf (&result, "%zd", (size_t) val);                          \
-  else                                                                  \
-      asprintf (&result, "%f", val);                                    \
+  asprintf (&result, "%g", val);                                        \
                                                                         \
   return result;                                                        \
   }                                                                     \
