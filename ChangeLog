@@ -1,5 +1,10 @@
 2018-03-18  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* utils/recutl.c (PATH_MAX): handle systems where it is not
+	defined such as GNU/Hurd.
+
+2018-03-18  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* src/rec-aggregate.c (REC_AGGREGATE_ACCUM_FUNC): Use %g instead
 	of %zd to print the result of aggregate functions.
 	* torture/utils/recsel.sh: Adjust expected result.

@@ -49,6 +49,10 @@
 #include <getpass.h>
 #include <tmpdir.h>
 #include <pathmax.h>
+/* GNU/Hurd doesn't define PATH_MAX  */
+#ifndef PATH_MAX
+# define PATH_MAX 8192
+#endif
 
 #include <rec.h>
 #include <recutl.h>
