@@ -1584,7 +1584,7 @@ test_tool recsel-aggregate-avg-grouped ok \
           '-p "Item,Avg(Cost)" -G Item' \
           sales \
 'Item: A
-Avg_Cost: 16.500000
+Avg_Cost: 16.5
 
 Item: B
 Avg_Cost: 50
