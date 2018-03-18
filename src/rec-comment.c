@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (C) 2009-2015 Jose E. Marchesi */
+/* Copyright (C) 2009-2018 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,9 +38,7 @@ rec_comment_t
 rec_comment_new (char *text)
 {
   if (!text)
-    {
-      return NULL;
-    }
+    return NULL;
 
   return strdup (text);
 }

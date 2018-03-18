@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (C) 2011-2015 Jose E. Marchesi */
+/* Copyright (C) 2011-2018 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,13 +86,9 @@ rec_encrypt (char   *in,
      padding the buffer with \0 characters.  */
 
   if ((real_in_size % AESV2_BLKSIZE) != 0)
-    {
-      padding = AESV2_BLKSIZE - (real_in_size % AESV2_BLKSIZE);
-    }
+    padding = AESV2_BLKSIZE - (real_in_size % AESV2_BLKSIZE);
   else
-    {
-      padding = 0;
-    }
+    padding = 0;
 
   if (padding != 0)
     {
@@ -100,9 +96,7 @@ rec_encrypt (char   *in,
       real_in = realloc (real_in, real_in_size);
 
       for (i = 0; i < padding; i++)
-        {
-          real_in[real_in_size - i - 1] = '\0';
-        }
+        real_in[real_in_size - i - 1] = '\0';
     }  
 
   /* Create the handler.  */
@@ -110,16 +104,12 @@ rec_encrypt (char   *in,
                         GCRY_CIPHER_AES128,
                         GCRY_CIPHER_MODE_CBC,
                         0) != GPG_ERR_NO_ERROR)
-    {
-      return false;
-    }
+    return false;
 
   /* Set the key of the cypher.  */
   password_size = strlen (password);
   for (i = 0; i < AESV2_KEYSIZE; i++)
-    {
-      key[i] = password[i % password_size];
-    }
+    key[i] = password[i % password_size];
 
   /* Set both the key and the IV vector.  */
   if (gcry_cipher_setkey (handler, key, AESV2_KEYSIZE)
@@ -130,10 +120,10 @@ rec_encrypt (char   *in,
     }
 
   gcry_create_nonce (iv, SALT_SIZE);
+
   for (i = SALT_SIZE; i < AESV2_BLKSIZE; i++)
-    {
       iv[i] = i;
-    }
+
   if (gcry_cipher_setiv (handler, iv, AESV2_BLKSIZE)
       != GPG_ERR_NO_ERROR)
     {
@@ -180,29 +170,21 @@ rec_decrypt (char   *in,
   size_t salt_size = 0;
 
   if (((in_size - SALT_SIZE) % AESV2_BLKSIZE) == 0)
-    {
-      salt_size = SALT_SIZE;
-    }
+    salt_size = SALT_SIZE;
   else if ((in_size % AESV2_BLKSIZE) != 0)
-    {
-      return false;
-    }
+    return false;
 
   /* Create the handler.  */
   if (gcry_cipher_open (&handler,
                         GCRY_CIPHER_AES128,
                         GCRY_CIPHER_MODE_CBC,
                         0) != GPG_ERR_NO_ERROR)
-    {
-      return false;
-    }
+    return false;
 
   /* Set the key of the cypher.  */
   password_size = strlen (password);
   for (i = 0; i < AESV2_KEYSIZE; i++)
-    {
-      key[i] = password[i % password_size];
-    }
+    key[i] = password[i % password_size];
 
   /* Set both the key and the IV vector.  */
   if (gcry_cipher_setkey (handler, key, AESV2_KEYSIZE)
@@ -215,10 +197,10 @@ rec_decrypt (char   *in,
 
   /* Extract salt at the end of the output.  */
   memcpy (iv, in + in_size - salt_size, salt_size);
+
   for (i = salt_size; i < AESV2_BLKSIZE; i++)
-    {
-      iv[i] = i;
-    }
+    iv[i] = i;
+
   if (gcry_cipher_setiv (handler, iv, AESV2_BLKSIZE)
       != GPG_ERR_NO_ERROR)
     {
@@ -321,9 +303,7 @@ rec_encrypt_field (rec_field_t field,
 
   field_value = strdup (rec_field_value (field));
   if (!field_value)
-    {
-      return false;
-    }
+    return false;
 
   /* Make sure the field is not already encrypted.  */
   if ((strlen (rec_field_value (field)) >= strlen (REC_ENCRYPTED_PREFIX))
@@ -336,9 +316,7 @@ rec_encrypt_field (rec_field_t field,
                     password,
                     &field_value_encrypted,
                     &out_size))
-    {
-      return false;
-    }
+    return false;
   
   /* Encode the encrypted value into base64.  */
 
@@ -413,9 +391,7 @@ rec_decrypt_field (rec_field_t field,
                        password,
                        &decrypted_value,
                        &decrypted_value_size))
-        {
-          rec_field_set_value (field, decrypted_value);
-        }
+        rec_field_set_value (field, decrypted_value);
 
       /* Free resources.  */
       free (base64_decoded);

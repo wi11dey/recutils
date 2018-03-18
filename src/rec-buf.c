@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (C) 2010-2015 Jose E. Marchesi */
+/* Copyright (C) 2010-2018 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,9 +77,7 @@ rec_buf_close (rec_buf_t buf)
 {
   /* Adjust the buffer.  */
   if (buf->used > 0)
-    {
       buf->data = realloc (buf->data, buf->used + 1);
-    }
   buf->data[buf->used] = '\0';
 
   /* Update the user-provided buffer and size.  */
@@ -94,9 +92,7 @@ void
 rec_buf_rewind (rec_buf_t buf, int n)
 {
   if ((buf->used - n) >= 0)
-    {
-      buf->used = buf->used - n;
-    }
+    buf->used = buf->used - n;
 }
 
 int
@@ -105,9 +101,7 @@ rec_buf_putc (int c, rec_buf_t buf)
   unsigned int ret;
 
   if (c == EOF)
-    {
-      return EOF;
-    }
+    return EOF;
 
   ret = (unsigned int) c;
   if ((buf->used + 1) > buf->size)
@@ -117,18 +111,14 @@ rec_buf_putc (int c, rec_buf_t buf)
       buf->data = realloc (buf->data, buf->size);
 
       if (!buf->data)
-        {
-          /* Not enough memory.
-           * REC_BUF_STEP should not be 0. */
-          ret = EOF;
-        }
+        /* Not enough memory.
+           REC_BUF_STEP should not be 0. */
+        ret = EOF;
     }
 
   if (ret != EOF)
-    {
-      /* Add the character */
-      buf->data[buf->used++] = (char) c;
-    }
+    /* Add the character */
+    buf->data[buf->used++] = (char) c;
 
   return ret;
 }
