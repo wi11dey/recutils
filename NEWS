@@ -13,6 +13,9 @@ See the manual for detailed information.
 * librec:
   . Fix evaluation of sexes containing #NAME expressions.
   . Make numeric results from aggregated functions signed.
+* readred:
+  . readrec --help now shows the help message and returns,
+    instead of waiting for input.
 * Emacs mode:
   . rec-mode.el now supports case-insensitive searches.
   . rec-mode.el now defines it's own faces.
