@@ -1,3 +1,8 @@
+2018-05-31  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* doc/recutils.texi (Bash Builtins): Note that some systems
+	require the full path to the bash builtin shared object.
+
 2018-03-19  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* configure.ac: Bump version to 1.7.91.

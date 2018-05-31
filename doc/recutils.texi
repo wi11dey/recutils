@@ -4789,6 +4789,10 @@ bash command.  The registering command for readrec would be:
 $ enable -f readrec.so readrec
 @end example
 
+Note however that some systems require the full path to
+@file{readrec.so} in order for this command to work.
+
+
 @menu
 * readrec::                  Exporting the contents of records to the shell.
 @end menu
