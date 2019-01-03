@@ -7,7 +7,7 @@ See the manual for detailed information.
   are permitted in any medium without royalty provided the copyright
   notice and this notice are preserved.
 
- Version 1.7.91 (19 March 2018)
+ Version 1.8 (3 January 2019)
 * Utilities:
   . Fix the build of readrec with recent bash headers.
 * librec:
