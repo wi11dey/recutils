@@ -1,4 +1,4 @@
-/* -*- mode: C -*- Time-stamp: "2012-04-22 13:50:41 jemarch"
+/* -*- mode: C -*- Time-stamp: "2019-01-03 09:45:44 jemarch"
  *
  *       File:         recmodule.c
  *       Date:         Sun Feb 26 20:27:56 2012
@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (C) 2012 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

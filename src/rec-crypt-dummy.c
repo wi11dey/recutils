@@ -1,4 +1,4 @@
-/* -*- mode: C -*- Time-stamp: "2015-04-27 19:51:10 jemarch"
+/* -*- mode: C -*- Time-stamp: "2019-01-03 09:46:25 jemarch"
  *
  *       File:         rec-crypt-dummy.c
  *       Date:         Tue Mar 27 21:29:06 2012
@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (C) 2012-2015 Michał Masłowski */
+/* Copyright (C) 2012-2019 Michał Masłowski */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
