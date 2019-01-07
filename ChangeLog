@@ -1,3 +1,8 @@
+2019-01-07  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* doc/recutils.texi (Top): Spurious menu header "Remote
+	Descriptors" removed.
+
 2019-01-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* configure.ac: Bump version to 1.8.

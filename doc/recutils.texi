@@ -184,8 +184,6 @@ Checking Recfiles
 * Syntactical Errors::       Fixing structure errors in recfiles.
 * Semantic Errors::          Fixing semantic errors in recfiles.
 
-Remote Descriptors
-
 Grouping and Aggregates
 
 * Grouping Records::         Combining records by fields.
