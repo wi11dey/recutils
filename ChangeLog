@@ -1,3 +1,9 @@
+2019-02-04  Brandon Invergo  <brandon@invergo.net>
+
+	* utils/rec2csv.c (DELIM_ARG): New long option.
+	(rec2csv_parse_args): Use DELIM_ARG and put RECORD_TYPE_ARG in the
+	right place.
+
 2019-01-07  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* doc/recutils.texi (Top): Spurious menu header "Remote

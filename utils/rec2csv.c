@@ -61,6 +61,7 @@ char              rec2csv_delim          = ',';
 enum
   {
     COMMON_ARGS,
+    DELIM_ARG,
     RECORD_TYPE_ARG,
     SORT_ARG
   };
@@ -68,6 +69,7 @@ enum
 static const struct option GNU_longOptions[] =
   {
     COMMON_LONG_ARGS,
+    {"delim", required_argument, NULL, DELIM_ARG},
     {"type", required_argument, NULL, RECORD_TYPE_ARG},
     {"sort", required_argument, NULL, SORT_ARG},
     {NULL, 0, NULL, 0}
@@ -123,12 +125,13 @@ rec2csv_parse_args (int argc,
       switch (c)
         {
           COMMON_ARGS_CASES
-        case RECORD_TYPE_ARG:
+        case DELIM_ARG:
         case 'd':
           {
             rec2csv_delim = optarg[0];
             break;
           }
+        case RECORD_TYPE_ARG:
         case 't':
           {
             rec2csv_record_type = xstrdup (optarg);
