@@ -115,7 +115,7 @@ Convert csv data into rec data.\n"), stdout);
      no-wrap */
   fputs (_("\
   -t, --type=TYPE                     type name for the converted records; if this\n\
-                                        parameter is ommited then no type is used.\n\
+                                        parameter is omitted then no type is used.\n\
   -s, --strict                        be strict parsing the csv file.\n\
   -e, --omit-empty                    omit empty fields.\n"), stdout);
 

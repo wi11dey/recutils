@@ -1,3 +1,9 @@
+2019-06-23  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* utils/csv2rec.c (recutl_print_help): Spelling fix: ommited ->
+	omitted.
+	Reported by Sven Wick.
+
 2019-02-04  Brandon Invergo  <brandon@invergo.net>
 
 	* utils/rec2csv.c (DELIM_ARG): New long option.
