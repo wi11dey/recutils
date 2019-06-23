@@ -2,6 +2,7 @@
 
 	* utils/csv2rec.c (recutl_print_help): Spelling fix: ommited ->
 	omitted.
+	* man/csv2rec.1: Regenerated.
 	Reported by Sven Wick.
 
 2019-02-04  Brandon Invergo  <brandon@invergo.net>
