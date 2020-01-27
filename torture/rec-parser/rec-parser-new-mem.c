@@ -7,7 +7,8 @@
  *
  */
 
-/* Copyright (C) 2010-2015 Jose E. Marchesi */
+/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2020 Jose E.
+ * Marchesi */
 /* Copyright (C) 2012-2015 Michał Masłowski */
 
 /* This program is free software: you can redistribute it and/or modify
