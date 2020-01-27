@@ -1,3 +1,8 @@
+2020-01-27  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* bootstrap.conf (gnulib_modules): Import module update-copyright.
+	* gnulib: Update submodule reference to latest master.
+
 2019-06-23  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* utils/csv2rec.c (recutl_print_help): Spelling fix: ommited ->
