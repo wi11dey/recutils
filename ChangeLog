@@ -1,3 +1,13 @@
+2020-01-28  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* utils/recutl.c (recutl_print_version): Update copyright.
+	* src/rec-crypt-dummy.c: Likewise.
+
+2020-01-28  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* configure.ac: Update version to 1.8.90.
+	* NEWS: Updated for 1.8.90.
+
 2020-01-28  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bootstrap.conf (gnulib_modules): Import the modules copy-file
