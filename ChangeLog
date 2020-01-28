@@ -1,3 +1,10 @@
+2020-01-28  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bootstrap.conf (gnulib_modules): Import the modules copy-file
+	and remove.
+	* utils/recutl.c (recutl_write_db_to_file): Copy and remove
+	instead of rename temporary files.
+
 2020-01-27  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* bootstrap.conf (gnulib_modules): Import module update-copyright.

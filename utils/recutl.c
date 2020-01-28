@@ -58,6 +58,7 @@
 #include <rec.h>
 #include <recutl.h>
 #include "read-file.h"
+#include "copy-file.h"
 
 /*
  * Global variables.
@@ -432,12 +433,13 @@ recutl_write_db_to_file (rec_db_t db,
 
   if (file_name)
     {
-      /* Rename the temporary file to file_name.  */
-      if (rename (tmp_file_name, file_name) == -1)
-        {
-          remove (tmp_file_name);
-          recutl_fatal (_("renaming file %s to %s\n"), tmp_file_name, file_name);
-        }
+      /* Rename the temporary file to file_name.  We copy and remove
+         instead of renaming because the later doesn't work across
+         different mount points, and it is getting common for /tmp to
+         be mounted in its own filesystem.  */
+      if (qcopy_file_preserving (tmp_file_name, file_name) != 0)
+        recutl_fatal (_("renaming file %s to %s\n"), tmp_file_name, file_name);
+      remove (tmp_file_name);
 
       /* Restore the attributes of the original file. */
       if (stat_result != -1)
