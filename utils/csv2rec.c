@@ -237,6 +237,9 @@ field_cb (void *s, size_t len, void *data)
     {
       /* Create a new field and insert it in the current record.  */
 
+      if (ctx->num_fields >= ctx->num_field_names)
+        recutl_fatal (_("error while parsing CSV file: too many columns in row\n"));
+
       if (!ctx->record)
         {
           /* Create a new record.  */
@@ -252,18 +255,21 @@ field_cb (void *s, size_t len, void *data)
               char *source = csv2rec_csv_file;
 
               if (!source)
-                {
-                  source = "stdin";
-                }
+                source = "stdin";
 
               fprintf (stderr,
-                       _("%s: %lu: this line contains %lu fields, but %lu header fields were read\n"),
+                       _("%s: %lu: \
+this line contains %lu fields, but %lu header fields were read\n"),
                        source,
-                       ctx->lineno, ctx->num_field_names, ctx->num_fields);
+                       ctx->lineno,
+                       ctx->num_field_names,
+                       ctx->num_fields);
               exit (EXIT_FAILURE);
             }
+
           field = rec_field_new (ctx->field_names[ctx->num_fields], str);
-          rec_mset_append (rec_record_mset (ctx->record), MSET_FIELD, (void *) field, MSET_ANY);
+          rec_mset_append (rec_record_mset (ctx->record), MSET_FIELD,
+                           (void *) field, MSET_ANY);
         }
 
       ctx->num_fields++;
@@ -279,9 +285,7 @@ record_cb (int c, void *data)
   ctx->lineno++;
 
   if (ctx->header_p)
-    {
-      ctx->header_p = false;
-    }
+    ctx->header_p = false;
   else
     {
       if (!ctx->rset)
@@ -344,14 +348,10 @@ process_csv (void)
   if (csv2rec_csv_file)
     {
       if (!(in = fopen (csv2rec_csv_file, "r")))
-        {
-          recutl_fatal (_("cannot read file %s\n"), csv2rec_csv_file);
-        }
+        recutl_fatal (_("cannot read file %s\n"), csv2rec_csv_file);
     }
   else
-    {
-      in = stdin;
-    }
+    in = stdin;
 
   /* Initialize the csv library.  */
   if (csv_init (&p, options) != 0)
@@ -372,11 +372,10 @@ process_csv (void)
   /* Parse the input file in chunks of data.  */
   while ((bytes_read = fread (buf, 1, 1024, in)) > 0)
     {
-      if (csv_parse (&p, buf, bytes_read, field_cb, record_cb, &ctx) != bytes_read)
-        {
-          recutl_fatal (_("error while parsing CSV file: %s\n"),
-                        csv_strerror (csv_error (&p)));
-        }
+      if (csv_parse (&p, buf, bytes_read, field_cb, record_cb, &ctx)
+          != bytes_read)
+        recutl_fatal (_("error while parsing CSV file: %s\n"),
+                      csv_strerror (csv_error (&p)));
 
     }
   
