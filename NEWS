@@ -12,7 +12,9 @@ See the manual for detailed information.
 * Utilities:
   . Fix bug preventing recins and recset to work when /tmp is
     in a different mount point.
-* Ohter fixes:
+  . Fix a segfault that occured when csv2rec was presented with
+    invalid data.
+* Other fixes:
   . gnulib updated.
 
  Version 1.8 (3 January 2019)
