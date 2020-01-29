@@ -14,6 +14,9 @@ See the manual for detailed information.
     in a different mount point.
   . Fix a segfault that occured when csv2rec was presented with
     invalid data.
+* Documentation:
+  . New manual chapter discussing the ob-rec.el major mode.
+  . Do not claim that recins creates non-existent files.
 * Other fixes:
   . gnulib updated.
 

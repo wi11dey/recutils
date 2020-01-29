@@ -5122,8 +5122,6 @@ If no @var{file} is specified then the command acts like a filter, getting
 the data from standard input and writing the result to
 standard output.
 
-If the specified @var{file} does not exist, it is created.
-
 In addition to the common options described earlier (@pxref{Common
 Options}) the program accepts the following options.
 

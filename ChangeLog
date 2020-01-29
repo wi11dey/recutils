@@ -1,3 +1,9 @@
+2020-01-29  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* doc/recutils.texi (Invoking recins): Do not claim that recins
+	creates non-existent files.
+	* NEWS: Update.
+
 2020-01-29  Dominic Walden  <dominic@dwalden.co.uk>
 
 	* doc/recutils.texi (Using ob-rec.el): New chapter.
