@@ -1,3 +1,7 @@
+2020-01-29  Dominic Walden  <dominic@dwalden.co.uk>
+
+	* doc/recutils.texi (Using ob-rec.el): New chapter.
+
 2020-01-29  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* utils/csv2rec.c (field_cb): Detect and error when a row contains

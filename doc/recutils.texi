@@ -114,6 +114,7 @@ Advanced Topics
 
 Reference Material
 * Invoking the Utilities::     Exhaustive list of command line arguments.
+* Using ob-rec.el::            Invoking Recutils from Emacs Org-mode source blocks.
 * Regular Expressions::        Flavor of regexps supported in recutils.
 * Date input formats::         Specifying dates and times.
 
@@ -5538,6 +5539,93 @@ line.
 Don't prune empty fields in the rec output.
 @end table
 
+@node Using ob-rec.el
+@chapter Using ob-rec.el
+
+ob-rec.el allows you to use Recutils as a language in org-mode source
+blocks.
+
+@section Setup
+
+Recutils should install the necessary files where emacs can see them.
+
+In your .emacs you may need to add:
+@example
+(require 'ob-rec)
+@end example
+
+You will need to add "rec" to your list of 'org-babel-load-languages' like
+below:
+@example
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((rec . t)))
+@end example
+
+@section Usage
+
+To your org file, add a src code block like:
+@example
+#+BEGIN_SRC rec :data books.rec
+  Location = 'loaned'
+#+END_SRC
+@end example
+
+This performs the equivalent of the command:
+@example
+ $ recsel -e "Location = 'loaned'" books.rec
+@end example
+
+It will produce a result like:
+@example
+#+RESULTS:
+| Title               | Author          | Date            | Location |
+|---------------------+-----------------+-----------------+----------|
+| The Colour of Magic | Terry Pratchett | 4/20/01 11:15pm | loaned   |
+@end example
+
+@section Header Arguments
+
+@table @samp
+@item :data
+The recfile you would like to query. Can be a relative path. Spaces in
+the filename or path need to be escaped with a backslash (for example,
+file\ name.rec). This is the only required header argument.
+
+@item :results
+If this list contains "scalar", "html", "code" or "verbatim" then the
+output will look the same as if called from the command line and it
+will not be put into an org table.
+
+@item :type
+Only returns this type of record. Corresponds to the -t argument. Accepts
+only one argument.
+
+@item :fields
+Comma-separated list of fields to print. Corresponds to the -p argument.
+
+@item :sort
+Comma-separated list of fields by which to sort records. Corresponds to
+the -S argument.
+
+@item :groupby
+Comma-separated list of fields by which to group records. If the
+records grouped together share fields in common, these will be in
+separate columns with a "_N" appended. Corresponds to the -G argument.
+
+@item :join
+Field on which to join records from one record set to another. Please see
+blah for more on how joins work. Corresponds to the -j argument.
+@end table
+
+@section Warnings
+
+@enumerate
+@item
+Output may be unpredictable if fields contain newlines, as would be the case
+for a multi-line field. This appears to be a limitation in org-mode's
+'org-table-convert-region' function.
+@end enumerate
 
 @node Regular Expressions
 @chapter Regular Expressions
