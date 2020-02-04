@@ -1379,6 +1379,37 @@ xxx: 20
 zzz: 40
 yyy: 30
 '
+
+test_declare_input_file blanks-before-fex-in-type \
+'%rec: Bug
+%mandatory: Id Title Desc Status Reporter Time
+%typedef: Id_t  int
+%type:  Id   Id_t
+%typedef: Status_t enum TODO ACTIVE DOING DONE
+%type: Status Status_t
+
+Id: 1
+Title: first bug
+Desc:  test recfiles
+Status: DONE
+Reporter: Hao Wu
+Time:  Thu Jan 30 14:11:05 CST 2020
+
+Id: 2
+Title: first bug
+Title: first bug
+Desc:  test recfiles
+Status: DONE
+Reporter: Hao Wu
+Time: : Thu Jan 30 14:10:56 CST 2020
+
+Id: 3
+Title: learn recfiles
+Desc: learn recfiles
+Status: DOING
+Reporter: Hao Wu
+Time: Mon Feb  3 14:35:03 CST 2020
+'                        
                         
 #
 # Declare tests.
@@ -2409,6 +2440,12 @@ test_tool recfix-allowed-xfail-3 xfail \
           recfix \
           '--check' \
           allowed-xfail-3
+
+test_tool recfix-blanks-before-fex-in-type ok \
+          recfix \
+          '--check' \
+          blanks-before-fex-in-type \
+          ''
         
 #
 # Cleanup.

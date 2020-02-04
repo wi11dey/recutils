@@ -1493,6 +1493,7 @@ rec_rset_type_field_fex (const char *str)
 
   p = str;
 
+  rec_skip_blanks (&p);
   if (rec_parse_regexp (&p,
                         "^" REC_FNAME_LIST_CS_RE,
                         &name))
