@@ -992,8 +992,8 @@ and then the ones from @file{contacts.rec}.
 
 @noindent
 Note however that @command{recsel} will merge records from several
-files specified in the command line only if they are anonyomuse.
-If the contacts in our files were typed:
+files specified in the command line only if they are anonymous.  If
+the contacts in our files were typed:
 
 @multitable @columnfractions .5 .5
 @item
