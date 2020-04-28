@@ -4462,9 +4462,9 @@ Karen van Rental (CEO)
 It is best to place such a template into a file, so that you can edit it
 as you wish.  
 Notice the instances of  double braces enclosing a  field name, @eg{} @code{@{@{Name@}@}}.
-These are called @dfn{spots} and indicate places where the respective field's
+These are called @dfn{slots} and indicate places where the respective field's
 value should be placed.
-@cindex spots
+@cindex slots
 Let's assume this template is in a file called @file{offer.templ}.
 We can then pipe the output from @command{recsel} into @command{recfmt} in order
 as follows:
@@ -4487,8 +4487,8 @@ We are delighted to be able to offer you a 95% discount on all car and
 @end example
 
 @noindent For each record that @command{recsel} selects, one copy of
-@file{offer.templ} will be generated.  Each spot will be replaced
-with the field value corresponding to the field name in the spot.
+@file{offer.templ} will be generated.  Each slot will be replaced
+with the field value corresponding to the field name in the slot.
 
 @menu
 * Templates::                Formatted output.
@@ -4499,18 +4499,18 @@ with the field value corresponding to the field name in the spot.
 
 @cindex templates
 A recfmt template is a text string that may contain @dfn{template
-spots}.  Those spots are substituted in the template using the
-information of a given record.  Any text that is not within a spot is
+slots}.  Those slots are substituted in the template using the
+information of a given record.  Any text that is not within a slot is
 copied literally to the output.
 
-Spots are written surrounded by double curly braces, like:
+Slots are written surrounded by double curly braces, like:
 
 @example
 @{@{@dots{}@}@}
 @end example
 
-Spots contain selection expressions, that are executed every time the
-template is applied to a record.  The spot is then replaced by the
+Slots contain selection expressions, that are executed every time the
+template is applied to a record.  The slot is then replaced by the
 string representation of the value returned by the expression.
 
 For example, consider the following template:
