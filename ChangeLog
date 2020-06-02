@@ -1,3 +1,11 @@
+2020-06-02  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* utils/recfix.c (recfix_do_check): Print an error message when a
+	file cannot be read.
+	(recfix_do_sort): Likewise.
+	(recfix_do_crypt): Likewise.
+	(recfix_do_auto): Likewise.
+
 2020-04-28  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* doc/recutils.texi: Templates have slots, not spots.

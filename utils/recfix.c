@@ -363,6 +363,7 @@ recfix_do_check ()
   db = recutl_read_db_from_file (recfix_file);
   if (!db)
     {
+      fprintf (stderr, _("recfix: error: cannot read file %s"), recfix_file);
       return EXIT_FAILURE;
     }
 
@@ -386,6 +387,7 @@ recfix_do_sort ()
   db = recutl_read_db_from_file (recfix_file);
   if (!db)
     {
+      fprintf (stderr, _("recfix: error: cannot read file %s"), recfix_file);
       return EXIT_FAILURE;
     }
 
@@ -426,6 +428,7 @@ recfix_do_crypt ()
   db = recutl_read_db_from_file (recfix_file);
   if (!db)
     {
+      fprintf (stderr, _("recfix: error: cannot read file %s"), recfix_file);
       return EXIT_FAILURE;
     }
 
@@ -497,6 +500,7 @@ recfix_do_auto ()
   db = recutl_read_db_from_file (recfix_file);
   if (!db)
     {
+      fprintf (stderr, _("recfix: error: cannot read file %s"), recfix_file);
       return EXIT_FAILURE;
     }
 
