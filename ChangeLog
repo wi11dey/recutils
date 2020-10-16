@@ -1,3 +1,8 @@
+2020-10-16  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/rec-mset.c: Simplify code.
+	* src/rec.h: Likewise.
+
 2020-06-02  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* utils/recfix.c (recfix_do_check): Print an error message when a

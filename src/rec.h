@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec.h
- *       Date:         Fri Feb 27 20:04:59 2009
- *
- *       GNU recutils - Main Header
- *
- */
+/* rec.h - recutils header file.  */
 
-/* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
- * 2018, 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2009-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-mset.c
- *       Date:         Thu Apr  1 17:07:00 2010
- *
- *       GNU recutils - Ordered Heterogeneous Set
- *
- */
+/* rec-mset.c - ordered heterogeneous sets.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,10 +26,6 @@
 
 #include <gl_array_list.h>
 #include <gl_list.h>
-
-/*
- * Data types.
- */
 
 #define MAX_NTYPES 4
 
@@ -69,37 +57,137 @@ struct rec_mset_s
   gl_list_t elem_list;
 };
 
-/*
- * Forward declarations of static functions.
- */
+static void
+rec_mset_init (rec_mset_t mset)
+{
+  /* Initialize the mset structure so it can be safely passed to
+     rec_mset_destroy even if its contents are not completely
+     initialized with real values.  */
 
-static void rec_mset_init (rec_mset_t mset);
-
-static bool rec_mset_elem_equal_fn (const void *e1,
-                                    const void *e2);
-static void rec_mset_elem_dispose_fn (const void *e);
-static int  rec_mset_elem_compare_fn (const void *e1, const void *e2);
-
-static rec_mset_list_iter_t rec_mset_iter_gl2mset (gl_list_iterator_t  list_iter);
-static gl_list_iterator_t   rec_mset_iter_mset2gl (rec_mset_list_iter_t mset_iter);
-
-/* Create a new element to be stored in a given mset, of the givent
-   type, and return it.  NULL is returned if there is no enough memory
-   to perform the operation.  */
-
-static rec_mset_elem_t rec_mset_elem_new (rec_mset_t mset,
-                                          rec_mset_type_t type,
-                                          void *data);
+  memset (mset, 0 /* NULL */, sizeof (struct rec_mset_s));
+}
 
 /* Destroy the resources used by a mset element, freeing any used
    memory.  The element reference becomes invalid after executing this
    function.  */
 
-static void rec_mset_elem_destroy (rec_mset_elem_t elem);
+static void
+rec_mset_elem_destroy (rec_mset_elem_t elem)
+{
+  if (elem)
+    {
+      /* Dispose the data stored in the element if a disposal callback
+         function was configured by the user.  The callback is never
+         invoked if the stored data is NULL.  */
+      if (elem->data && elem->mset->disp_fn[elem->type])
+        elem->mset->disp_fn[elem->type] (elem->data);
 
-/*
- * Public functions.
- */
+      free (elem);
+    }
+}
+
+static bool
+rec_mset_elem_equal_fn (const void *e1,
+                        const void *e2)
+{
+  rec_mset_elem_t elem1;
+  rec_mset_elem_t elem2;
+
+  elem1 = (rec_mset_elem_t) e1;
+  elem2 = (rec_mset_elem_t) e2;
+
+  if ((elem1->mset != elem2->mset)
+      || (elem1->type != elem2->type))
+    return false;
+
+  return (elem1->mset->equal_fn[elem1->type]) (elem1->data,
+                                               elem2->data);
+}
+
+static void
+rec_mset_elem_dispose_fn (const void *e)
+{
+  rec_mset_elem_t elem;
+
+  elem = (rec_mset_elem_t) e;
+  rec_mset_elem_destroy (elem);
+}
+
+static int
+rec_mset_elem_compare_fn (const void *e1,
+                          const void *e2)
+{
+  int result = 0;
+  rec_mset_elem_t elem1;
+  rec_mset_elem_t elem2;
+
+  elem1 = (rec_mset_elem_t) e1;
+  elem2 = (rec_mset_elem_t) e2;
+
+  if (elem1->mset->compare_fn)
+    result = (elem1->mset->compare_fn[elem1->type]) (elem1->data,
+                                                     elem2->data,
+                                                     elem2->type);
+  return result;
+}
+
+static rec_mset_list_iter_t
+rec_mset_iter_gl2mset (gl_list_iterator_t list_iter)
+{
+  rec_mset_list_iter_t mset_iter;
+
+  mset_iter.vtable = (void *) list_iter.vtable;
+  mset_iter.list   = (void *) list_iter.list;
+  mset_iter.count  = list_iter.count;
+  mset_iter.p      = list_iter.p;
+  mset_iter.q      = list_iter.q;
+  mset_iter.i      = list_iter.i;
+  mset_iter.j      = list_iter.j;
+
+  return mset_iter;
+}
+
+static gl_list_iterator_t
+rec_mset_iter_mset2gl (rec_mset_list_iter_t mset_iter)
+{
+  gl_list_iterator_t list_iter;
+
+  list_iter.vtable = (const struct gl_list_implementation *) mset_iter.vtable;
+  list_iter.list  = (gl_list_t) mset_iter.list;
+  list_iter.count = mset_iter.count;
+  list_iter.p     = mset_iter.p;
+  list_iter.q     = mset_iter.q;
+  list_iter.i     = mset_iter.i;
+  list_iter.j     = mset_iter.j;
+
+  return list_iter;
+}
+
+/* Create a new element to be stored in a given mset, of the givent
+   type, and return it.  NULL is returned if there is no enough memory
+   to perform the operation.  */
+
+static rec_mset_elem_t
+rec_mset_elem_new (rec_mset_t mset,
+                   rec_mset_type_t type,
+                   void *data)
+{
+  rec_mset_elem_t new;
+
+  if (type >= mset->ntypes)
+    return NULL;
+
+  new = malloc (sizeof (struct rec_mset_elem_s));
+  if (new)
+    {
+      new->type = type;
+      new->data = data;
+      new->mset = mset;
+      new->list_node = NULL;
+    }
+
+  return new;
+}
 
 rec_mset_t
 rec_mset_new (void)
@@ -162,7 +250,7 @@ rec_mset_dup (rec_mset_t mset)
   rec_mset_elem_t elem;
   gl_list_iterator_t iter;
   int i;
-  
+
   new = rec_mset_new ();
 
   if (new)
@@ -207,9 +295,7 @@ rec_mset_dup (rec_mset_t mset)
                 }
             }
           else
-            {
-              data = elem->data;
-            }
+            data = elem->data;
 
           /* Append the new data into a new element.  */
 
@@ -239,10 +325,8 @@ rec_mset_sort (rec_mset_t mset)
                                              rec_mset_elem_dispose_fn,
                                              true);
   if (!mset->elem_list)
-    {
-      /* Out of memory.  */
-      return NULL;
-    }
+    /* Out of memory.  */
+    return NULL;
 
   /* Iterate on the old list getting the data of the elements and
      inserting it into the new sorted gl_list.  */
@@ -322,14 +406,11 @@ rec_mset_get_at (rec_mset_t mset,
                  rec_mset_type_t type,
                  size_t position)
 {
-  void *result;
   rec_mset_elem_t elem;
 
   if ((position < 0) || (position >= mset->count[type]))
-    {
-      /* Invalid position.  */
-      return NULL;
-    }
+    /* Invalid position.  */
+    return NULL;
 
   if (type == MSET_ANY)
     {
@@ -348,16 +429,14 @@ rec_mset_get_at (rec_mset_t mset,
 
       rec_mset_elem_t cur_elem;
       gl_list_node_t node;
-      gl_list_iterator_t iter; 
+      gl_list_iterator_t iter;
       int count[MAX_NTYPES];
       int i = 0;
 
       elem = NULL;
       for (i = 0; i < MAX_NTYPES; i++)
-        {
-          count[i] = 0;
-        }
-      
+        count[i] = 0;
+
       iter = gl_list_iterator (mset->elem_list);
       while (gl_list_iterator_next (&iter, (const void **) &cur_elem, &node))
         {
@@ -375,16 +454,7 @@ rec_mset_get_at (rec_mset_t mset,
         }
     }
 
-  if (elem)
-    {
-      result = elem->data;
-    }
-  else
-    {
-      result = NULL;
-    }
-
-  return result;
+  return (elem ? elem->data : NULL);
 }
 
 bool
@@ -399,20 +469,15 @@ rec_mset_remove_at (rec_mset_t mset,
   if (mset->count[type] > 0)
     {
       if (position < 0)
-        {
-          position = 0;
-        }
+        position = 0;
+
       if (position >= mset->count[type])
-        {
-          position = mset->count[type] - 1;
-        }
+        position = mset->count[type] - 1;
 
       data = rec_mset_get_at (mset, type, position);
       elem = rec_mset_search (mset, data);
       if (rec_mset_remove_elem (mset, elem))
-        {
-          removed = true;
-        }
+        removed = true;
     }
 
   return removed;
@@ -431,12 +496,10 @@ rec_mset_insert_at (rec_mset_t mset,
 
   /* Create the mset element to insert in the gl_list, returning NULL
      if there is no enough memory.  */
-  
+
   elem = rec_mset_elem_new (mset, type, data);
   if (!elem)
-    {
-      return NULL;
-    }
+    return NULL;
 
   /* Insert the element at the proper place in the list.  */
 
@@ -468,9 +531,7 @@ rec_mset_insert_at (rec_mset_t mset,
 
       mset->count[0]++;
       if (elem->type != MSET_ANY)
-        {
-          mset->count[elem->type]++;
-        }
+        mset->count[elem->type]++;
     }
 
   return elem;
@@ -500,11 +561,9 @@ rec_mset_remove_elem (rec_mset_t mset,
 
       mset->count[type]--;
       if (type != MSET_ANY)
-        {
-          mset->count[MSET_ANY]--;
-        }
+        mset->count[MSET_ANY]--;
     }
-  
+
   return res;
 }
 
@@ -522,9 +581,7 @@ rec_mset_insert_after (rec_mset_t mset,
 
   new_elem = rec_mset_elem_new (mset, type, data);
   if (!new_elem)
-    {
-      return NULL;
-    }
+    return NULL;
 
   /* Find the requested place where to insert the new element.  If
      ELEM is not found in the multi-set then the new element is
@@ -547,9 +604,7 @@ rec_mset_insert_after (rec_mset_t mset,
 
       mset->count[0]++;
       if (new_elem->type != MSET_ANY)
-        {
-          mset->count[new_elem->type]++;
-        }
+        mset->count[new_elem->type]++;
     }
   else
     {
@@ -602,7 +657,7 @@ rec_mset_iterator (rec_mset_t mset)
 
   mset_iter.mset = mset;
 
-  list_iter = gl_list_iterator (mset->elem_list);  
+  list_iter = gl_list_iterator (mset->elem_list);
   mset_iter.list_iter = rec_mset_iter_gl2mset (list_iter);
 
   return mset_iter;
@@ -632,7 +687,7 @@ rec_mset_iterator_next (rec_mset_iterator_t *iterator,
   if (found)
     {
       /* Update the multi-set iterator and set both DATA and ELEM.  */
-      
+
       iterator->list_iter = rec_mset_iter_gl2mset (list_iter);
       if (data)
         *data = mset_elem->data;
@@ -708,7 +763,7 @@ rec_mset_dump (rec_mset_t mset)
   gl_list_node_t node;
   rec_mset_elem_t elem;
   int i;
-  
+
   printf ("MSET:\n");
   printf ("  ntypes: %d\n", mset->ntypes);
 
@@ -746,9 +801,7 @@ rec_mset_add_sorted (rec_mset_t mset,
 
   elem = rec_mset_elem_new (mset, type, data);
   if (!elem)
-    {
-      return NULL;
-    }
+    return NULL;
 
   /* Insert the element at the proper place in the list.  */
 
@@ -765,149 +818,7 @@ rec_mset_add_sorted (rec_mset_t mset,
 
   mset->count[0]++;
   if (elem->type != MSET_ANY)
-    {
-      mset->count[elem->type]++;
-    }
+    mset->count[elem->type]++;
 
   return elem;
 }
-
-/*
- * Private functions.
- */
-
-static void
-rec_mset_init (rec_mset_t mset)
-{
-  /* Initialize the mset structure so it can be safely passed to
-     rec_mset_destroy even if its contents are not completely
-     initialized with real values.  */
-
-  memset (mset, 0 /* NULL */, sizeof (struct rec_mset_s));
-}
-
-static bool
-rec_mset_elem_equal_fn (const void *e1,
-                        const void *e2)
-{
-  rec_mset_elem_t elem1;
-  rec_mset_elem_t elem2;
-
-  elem1 = (rec_mset_elem_t) e1;
-  elem2 = (rec_mset_elem_t) e2;
-
-  if ((elem1->mset != elem2->mset)
-      || (elem1->type != elem2->type))
-    {
-      return false;
-    }
-
-  return (elem1->mset->equal_fn[elem1->type]) (elem1->data,
-                                               elem2->data);
-}
-
-static void
-rec_mset_elem_dispose_fn (const void *e)
-{
-  rec_mset_elem_t elem;
-
-  elem = (rec_mset_elem_t) e;
-  rec_mset_elem_destroy (elem);
-}
-
-static int
-rec_mset_elem_compare_fn (const void *e1,
-                          const void *e2)
-{
-  int result = 0;
-  rec_mset_elem_t elem1;
-  rec_mset_elem_t elem2;
-
-  elem1 = (rec_mset_elem_t) e1;
-  elem2 = (rec_mset_elem_t) e2;
-
-  if (elem1->mset->compare_fn)
-    {
-      result = (elem1->mset->compare_fn[elem1->type]) (elem1->data,
-                                                       elem2->data,
-                                                       elem2->type);
-    }
-
-  return result;
-}
-
-static rec_mset_list_iter_t
-rec_mset_iter_gl2mset (gl_list_iterator_t list_iter)
-{
-  rec_mset_list_iter_t mset_iter;
-
-  mset_iter.vtable = (void *) list_iter.vtable;
-  mset_iter.list   = (void *) list_iter.list;
-  mset_iter.count  = list_iter.count;
-  mset_iter.p      = list_iter.p;
-  mset_iter.q      = list_iter.q;
-  mset_iter.i      = list_iter.i;
-  mset_iter.j      = list_iter.j;
-
-  return mset_iter;
-}
-
-static gl_list_iterator_t
-rec_mset_iter_mset2gl (rec_mset_list_iter_t mset_iter)
-{
-  gl_list_iterator_t list_iter;
-
-  list_iter.vtable = (const struct gl_list_implementation *) mset_iter.vtable;
-  list_iter.list  = (gl_list_t) mset_iter.list;
-  list_iter.count = mset_iter.count;
-  list_iter.p     = mset_iter.p;
-  list_iter.q     = mset_iter.q;
-  list_iter.i     = mset_iter.i;
-  list_iter.j     = mset_iter.j;
-
-  return list_iter;
-}
-
-static rec_mset_elem_t
-rec_mset_elem_new (rec_mset_t mset,
-                   rec_mset_type_t type,
-                   void *data)
-{
-  rec_mset_elem_t new;
-
-  if (type >= mset->ntypes)
-    {
-      return NULL;
-    }
-
-  new = malloc (sizeof (struct rec_mset_elem_s));
-  if (new)
-    {
-      new->type = type;
-      new->data = data;
-      new->mset = mset;
-      new->list_node = NULL;
-    }
-
-  return new;
-}
-
-static void
-rec_mset_elem_destroy (rec_mset_elem_t elem)
-{
-  if (elem)
-    {
-      /* Dispose the data stored in the element if a disposal callback
-         function was configured by the user.  The callback is never
-         invoked if the stored data is NULL.  */
-      
-      if (elem->data && elem->mset->disp_fn[elem->type])
-        {
-          elem->mset->disp_fn[elem->type] (elem->data);
-        }
-      
-      free (elem);
-    }
-}
-
-/* End of rec-mset.c */
