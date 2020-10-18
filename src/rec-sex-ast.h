@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-sex-ast.h
- *       Date:         Tue Jan 12 17:07:59 2010
- *
- *       GNU recutils - SEX Abstract Syntax Trees
- *
- */
+/* rec-sex-ast.h - SEX Abstract Syntax Trees.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +72,8 @@ rec_sex_ast_t rec_sex_ast_new ();
 void rec_sex_ast_destroy (rec_sex_ast_t ast);
 
 /* Running the AST.  */
-/* Not here but in rec-sex.c int rec_sex_ast_run (rec_sex_ast_t ast, rec_record_t record); */
+/* Not here but in rec-sex.c int rec_sex_ast_run (rec_sex_ast_t ast,
+   rec_record_t record); */
 
 rec_sex_ast_node_t rec_sex_ast_top (rec_sex_ast_t ast);
 void rec_sex_ast_set_top (rec_sex_ast_t ast, rec_sex_ast_node_t node);
@@ -101,7 +94,9 @@ char *rec_sex_ast_node_str (rec_sex_ast_node_t node);
 void rec_sex_ast_node_set_str (rec_sex_ast_node_t node, char *str);
 const char *rec_sex_ast_node_name (rec_sex_ast_node_t node);
 const char *rec_sex_ast_node_subname (rec_sex_ast_node_t node);
-void rec_sex_ast_node_set_name (rec_sex_ast_node_t node, const char *name, const char *subname);
+void rec_sex_ast_node_set_name (rec_sex_ast_node_t node,
+                                const char *name,
+                                const char *subname);
 
 int rec_sex_ast_node_num_children (rec_sex_ast_node_t node);
 
@@ -132,7 +127,4 @@ bool rec_sex_ast_name_p (rec_sex_ast_t ast, const char *name, size_t idx);
    of type REC_SEX_OP_SHA, i.e. it recognizes #NAME in the source.  */
 bool rec_sex_ast_hash_name_p (rec_sex_ast_t ast, const char *name);
 
-#endif /* rec-sex-ast.h */
-
-
-/* End of rec-sex-ast.h */
+#endif /* ! REC_SEX_AST_H */

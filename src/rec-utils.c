@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-utils.c
- *       Date:         Fri Apr  9 19:45:00 2010
- *
- *       GNU recutils - Miscellanea utilities
- *
- */
+/* rec-utils.c - Miscellanea utilities.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +57,7 @@ rec_atod (const char *str,
   char *end;
 
   res = false;
-  
+
   setlocale (LC_NUMERIC, "C"); /* We want the dot to always be the
                                   decimal separator. */
   *number = strtod (str, &end);
@@ -73,11 +65,9 @@ rec_atod (const char *str,
                                  environment.  */
 
   if ((*str != '\0') && (*end == '\0'))
-    {
-      /* The entire string is valid.  */
-      res = true;
-    }
-  
+    /* The entire string is valid.  */
+    res = true;
+
   return res;
 }
 
@@ -91,7 +81,9 @@ rec_extract_file (const char *str)
 
   if (regcomp (&regexp, "[ \n\t]" REC_FILE_REGEXP, REG_EXTENDED) != 0)
     {
-      fprintf (stderr, _("internal error: rec_int_rec_extract_file: error compiling regexp.\n"));
+      fprintf (stderr,
+               _("internal error: rec_int_rec_extract_file:\
+ error compiling regexp.\n"));
       return NULL;
     }
 
@@ -119,7 +111,9 @@ rec_extract_url (const char *str)
 
   if (regcomp (&regexp, REC_URL_REGEXP, REG_EXTENDED) != 0)
     {
-      fprintf (stderr, _("internal error: rec_int_rec_extract_url: error compiling regexp.\n"));
+      fprintf (stderr,
+               _("internal error:\
+ rec_int_rec_extract_url: error compiling regexp.\n"));
       return NULL;
     }
 
@@ -148,7 +142,9 @@ rec_extract_type (const char *str)
   /* TODO: use a REC_TYPE_NAME_RE  */
   if (regcomp (&regexp, REC_FNAME_RE, REG_EXTENDED) != 0)
     {
-      fprintf (stderr, _("internal error: rec_int_rec_extract_url: error compiling regexp.\n"));
+      fprintf (stderr,
+               _("internal error:\
+ rec_int_rec_extract_url: error compiling regexp.\n"));
       return NULL;
     }
 
@@ -190,14 +186,10 @@ rec_parse_int (const char **str, int *num)
   number[p - b] = '\0';
 
   if (!rec_atoi (number, num))
-    {
-      ret = false;
-    }
+    ret = false;
 
   if (ret)
-    {
-      *str = p;
-    }
+    *str = p;
 
   return ret;
 }
@@ -215,9 +207,7 @@ rec_parse_regexp (const char **str, const char *re, char **result)
 
   /* Compile the regexp.  */
   if (regcomp (&regexp, re, REG_EXTENDED) != 0)
-    {
-      ret = false;
-    }
+    ret = false;
 
   if (ret)
     {
@@ -241,18 +231,14 @@ rec_parse_regexp (const char **str, const char *re, char **result)
         {
           ret = false;
           if (result)
-            {
-              *result = NULL;
-            }
+            *result = NULL;
         }
 
       regfree (&regexp);
     }
 
   if (ret)
-    {
-      *str = p;
-    }
+    *str = p;
 
   return ret;
 }
@@ -264,9 +250,7 @@ rec_skip_blanks (const char **str)
 
   p = *str;
   while (rec_blank_p (*p))
-    {
-      p++;
-    }
+    p++;
 
   *str = p;
 }
@@ -334,9 +318,7 @@ rec_extract_size (const char *str)
   int res;
 
   if (!rec_match (str, REC_INT_SIZE_RE))
-    {
-      return 0;
-    }
+    return 0;
 
   p = str;
   rec_skip_blanks (&p);
@@ -355,9 +337,7 @@ rec_extract_size_condition (const char *str)
   enum rec_size_condition_e condition;
 
   if (!rec_match (str, REC_INT_SIZE_RE))
-    {
-      return SIZE_COND_E;
-    }
+    return SIZE_COND_E;
 
   p = str;
   rec_skip_blanks (&p);
@@ -366,21 +346,13 @@ rec_extract_size_condition (const char *str)
   if (condition_str)
     {
       if (strcmp (condition_str, ">") == 0)
-        {
-          condition = SIZE_COND_G;
-        }
+        condition = SIZE_COND_G;
       else if (strcmp (condition_str, ">=") == 0)
-        {
-          condition = SIZE_COND_GE;
-        }
+        condition = SIZE_COND_GE;
       else if (strcmp (condition_str, "<") == 0)
-        {
-          condition = SIZE_COND_L;
-        }
+        condition = SIZE_COND_L;
       else if (strcmp (condition_str, "<=") == 0)
-        {
-          condition = SIZE_COND_LE;
-        }
+        condition = SIZE_COND_LE;
       else
         {
           fprintf (stderr, "internal error: rec_extract_size_condition: invalid condition.\n");
@@ -390,9 +362,7 @@ rec_extract_size_condition (const char *str)
       free (condition_str);
     }
   else
-    {
-      condition = SIZE_COND_E;
-    }
+    condition = SIZE_COND_E;
 
   return condition;
 }
@@ -444,5 +414,3 @@ rec_concat_strings (const char *str1,
 
   return res;
 }
-
-/* End of rec-utils.c */

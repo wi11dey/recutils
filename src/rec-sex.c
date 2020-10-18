@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-sex.c
- *       Date:         Sat Jan  9 20:28:43 2010
- *
- *       GNU recutils - Record Selection Expressions.
- *
- */
+/* rec-sex.c - Record Selection Expressions.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,10 +29,6 @@
 #include <rec-sex-parser.h>
 #include <rec-sex-tab.h>
 
-/*
- * Data structures
- */
-
 struct rec_sex_s
 {
   rec_sex_ast_t ast;
@@ -60,224 +48,6 @@ struct rec_sex_val_s
   char *str_val;
 };
 
-/* Static functions declarations.  */
-static struct rec_sex_val_s rec_sex_eval_node (rec_sex_t sex,
-                                               rec_record_t record,
-                                               rec_sex_ast_node_t node,
-                                               bool *status);
-static bool rec_sex_op_real_p (struct rec_sex_val_s op1,
-                               struct rec_sex_val_s op2);
-
-/*
- * Public functions.
- */
-
-rec_sex_t
-rec_sex_new (bool case_insensitive)
-{
-  rec_sex_t new;
-
-  new = malloc (sizeof (struct rec_sex_s));
-  if (new)
-    {
-      /* Initialize a new parser.  */
-      new->parser = rec_sex_parser_new ();
-      rec_sex_parser_set_case_insensitive (new->parser,
-                                           case_insensitive);
-
-      /* Initialize a new AST.  */
-      new->ast = NULL;
-    }
-
-  return new;
-}
-
-void
-rec_sex_destroy (rec_sex_t sex)
-{
-  if (sex)
-    {
-      if (sex->parser)
-        {
-          rec_sex_parser_destroy (sex->parser);
-        }
-      
-      if (sex->ast)
-        {
-          rec_sex_ast_destroy (sex->ast);
-        }
-      
-      free (sex);  /* yeah! :D */
-    }
-}
-
-bool
-rec_sex_compile (rec_sex_t sex,
-                 const char *expr)
-{
-  bool res;
-
-  res = rec_sex_parser_run (sex->parser, expr);
-  if (res)
-    {
-      sex->ast = rec_sex_parser_ast (sex->parser);
-    }
-  return res;
-}
-
-#define EXEC_AST(RECORD)                                                \
-  do                                                                    \
-    {                                                                   \
-      val = rec_sex_eval_node (sex,                                     \
-                               (RECORD),                                \
-                               rec_sex_ast_top (sex->ast),              \
-                               status);                                 \
-                                                                        \
-      switch (val.type)                                                 \
-        {                                                               \
-        case REC_SEX_VAL_INT:                                           \
-          {                                                             \
-            res = (val.int_val != 0);                                   \
-            break;                                                      \
-          }                                                             \
-        case REC_SEX_VAL_REAL:                                          \
-        case REC_SEX_VAL_STR:                                           \
-          {                                                             \
-            res = false;                                                \
-            break;                                                      \
-          }                                                             \
-        }                                                               \
-    }                                                                   \
-  while (0)
-
-char *
-rec_sex_eval_str (rec_sex_t sex,
-                  rec_record_t record)
-{
-  char *res;
-  struct rec_sex_val_s val;
-  bool status;
-
-  rec_sex_ast_node_unfix (rec_sex_ast_top (sex->ast));
-  val = rec_sex_eval_node (sex,
-                           record,
-                           rec_sex_ast_top (sex->ast),
-                           &status);
-
-  if (!status)
-    {
-      /* Error evaluating the expression.  */
-      return NULL;
-    }
-
-  res = NULL;
-  switch (val.type)
-    {
-    case REC_SEX_VAL_INT:
-      {
-        asprintf (&res, "%d", val.int_val);
-        break;
-      }
-    case REC_SEX_VAL_REAL:
-      {
-        asprintf (&res, "%f", val.real_val);
-        break;
-      }
-    case REC_SEX_VAL_STR:
-      {
-        res = strdup (val.str_val);
-        break;
-      }
-    }
-
-  return res;
-}
-
-bool
-rec_sex_eval (rec_sex_t sex,
-              rec_record_t record,
-              bool *status)
-{
-  bool res;
-  rec_field_t field;
-  rec_field_t wfield;
-  rec_record_t wrec;
-  rec_mset_iterator_t iter;
-  int j, nf;
-  struct rec_sex_val_s val;
-  
-  res = false;
-  wrec = NULL;
-
-  rec_sex_ast_node_unfix (rec_sex_ast_top (sex->ast));
-  EXEC_AST (record);
-  if (res)
-    {
-      goto exit;
-    }
-
-  rec_record_reset_marks (record);
-
-  iter = rec_mset_iterator (rec_record_mset (record));
-  while (rec_mset_iterator_next (&iter, MSET_FIELD, (const void**) &field, NULL))
-    {
-      nf = rec_record_get_num_fields_by_name (record, rec_field_name (field));
-      if ((nf > 1)
-          && (rec_record_field_mark (record, field) == 0)
-          && (rec_sex_ast_name_p (sex->ast, rec_field_name (field), nf))
-          && (!rec_sex_ast_hash_name_p (sex->ast, rec_field_name (field))))
-        {
-          for (j = 0; j < nf; j++)
-            {
-              wfield = rec_record_get_field_by_name (record,
-                                                     rec_field_name (field),
-                                                     j);
-              if (wrec)
-                {
-                  rec_record_destroy (wrec);
-                }
-
-              rec_record_mark_field (record, wfield, 1);
-
-              wrec = rec_record_dup (record);
-              rec_record_remove_field_by_name (wrec,
-                                               rec_field_name (field),
-                                               -1); /* Delete all.  */
-              rec_mset_append (rec_record_mset (wrec), MSET_FIELD, (void *) rec_field_dup (wfield), MSET_ANY);
-
-              EXEC_AST(wrec);
-
-              if (res)
-                {
-                  rec_record_destroy (wrec);
-                  goto exit;
-                }
-            }
-        }
-    }
-
-  rec_mset_iterator_free (&iter);
-
- exit:          
-
-  if (!*status)
-    {
-      res = false;
-    }
-
-  return res;
-}
-
-void
-rec_sex_print_ast (rec_sex_t sex)
-{
-  rec_sex_parser_print_ast (sex->parser);
-}
-
-/*
- * Private functions.
- */
-
 #define GET_CHILD_VAL(DEST,NUM)                                         \
   do                                                                    \
     {                                                                   \
@@ -291,7 +61,6 @@ rec_sex_print_ast (rec_sex_t sex)
         }                                                               \
     }                                                                   \
     while (0)
-
 
 #define ATOI_VAL(DEST, VAL)                             \
   do                                                    \
@@ -389,6 +158,65 @@ rec_sex_print_ast (rec_sex_t sex)
     }                                                   \
   while (0)
 
+static bool
+rec_sex_op_real_p (struct rec_sex_val_s op1,
+                   struct rec_sex_val_s op2)
+{
+  bool ret;
+  int integer;
+  double real;
+
+  ret = true;
+
+  if ((op1.type == REC_SEX_VAL_INT)
+      || ((op1.type == REC_SEX_VAL_STR)
+          && rec_atoi (op1.str_val, &integer)))
+    {
+      /* Operand 1 is an integer.  */
+      switch (op2.type)
+        {
+        case REC_SEX_VAL_INT:
+          ret = false;
+          break;
+        case REC_SEX_VAL_REAL:
+          ret = true;
+          break;
+        case REC_SEX_VAL_STR:
+          ret = (rec_atod (op2.str_val, &real)
+                 && (!rec_atoi (op2.str_val, &integer)));
+          break;
+        default:
+          ret = false;
+          break;
+        }
+    }
+
+  if ((op1.type == REC_SEX_VAL_REAL)
+      || ((op1.type == REC_SEX_VAL_STR)
+          && rec_atod (op1.str_val, &real)
+          && (!rec_atoi (op1.str_val, &integer))))
+    {
+      /* Operand 1 is a real.  */
+      switch (op2.type)
+        {
+        case REC_SEX_VAL_INT:
+          ret = true;
+          break;
+        case REC_SEX_VAL_REAL:
+          ret = true;
+          break;
+        case REC_SEX_VAL_STR:
+          ret = rec_atod (op2.str_val, &real);
+          break;
+        default:
+          ret = false;
+          break;
+        }
+    }
+
+  return ret;
+}
+
 struct rec_sex_val_s
 rec_sex_eval_node (rec_sex_t sex,
                    rec_record_t record,
@@ -406,11 +234,13 @@ rec_sex_eval_node (rec_sex_t sex,
     {
     case REC_SEX_NOVAL:
       {
-        fprintf (stderr, "Application bug: REC_SEX_NOVAL node found.\nPlease report this!\n");
+        fprintf (stderr,
+                 "Application bug: REC_SEX_NOVAL node found.\n\
+Please report this!\n");
         exit (EXIT_FAILURE);
         break;
+        /* Operations.  */
       }
-      /* Operations.  */
     case REC_SEX_OP_NEG:
     case REC_SEX_OP_ADD:
       {
@@ -465,7 +295,6 @@ rec_sex_eval_node (rec_sex_t sex,
         else
           {
             /* Integer operation.  */
-
             ATOI_VAL (op1, child_val1);
             ATOI_VAL (op2, child_val2);
 
@@ -499,7 +328,7 @@ rec_sex_eval_node (rec_sex_t sex,
             /* Integer operation.  */
             ATOI_VAL (op1, child_val1);
             ATOI_VAL (op2, child_val2);
-            
+
             res.type = REC_SEX_VAL_INT;
             res.int_val = op1 * op2;
           }
@@ -530,13 +359,11 @@ rec_sex_eval_node (rec_sex_t sex,
             /* Integer operation.  */
             ATOI_VAL (op1, child_val1);
             ATOI_VAL (op2, child_val2);
-            
+
             res.type = REC_SEX_VAL_INT;
-            
+
             if (op2 != 0)
-              {
-                res.int_val = op1 / op2;
-              }
+              res.int_val = op1 / op2;
             else
               {
                 /* Error: division by zero */
@@ -562,9 +389,7 @@ rec_sex_eval_node (rec_sex_t sex,
         res.type = REC_SEX_VAL_INT;
 
         if (op2 != 0)
-          {
-            res.int_val = op1 % op2;
-          }
+          res.int_val = op1 % op2;
         else
           {
             /* Error: division by zero */
@@ -591,15 +416,11 @@ rec_sex_eval_node (rec_sex_t sex,
             res.type = REC_SEX_VAL_INT;
 
             if (rec_sex_parser_case_insensitive (sex->parser))
-              {
-                res.int_val = (strcasecmp (child_val1.str_val,
-                                           child_val2.str_val) == 0);
-              }
+              res.int_val = (strcasecmp (child_val1.str_val,
+                                         child_val2.str_val) == 0);
             else
-              {
-                res.int_val = (strcmp (child_val1.str_val,
-                                       child_val2.str_val) == 0);
-              }
+              res.int_val = (strcmp (child_val1.str_val,
+                                     child_val2.str_val) == 0);
           }
         else
           {
@@ -617,7 +438,7 @@ rec_sex_eval_node (rec_sex_t sex,
                 /* Integer comparison.  */
                 ATOI_VAL (op1, child_val1);
                 ATOI_VAL (op2, child_val2);
-                
+
                 res.type = REC_SEX_VAL_INT;
                 res.int_val = op1 == op2;
               }
@@ -642,15 +463,11 @@ rec_sex_eval_node (rec_sex_t sex,
             res.type = REC_SEX_VAL_INT;
 
             if (rec_sex_parser_case_insensitive (sex->parser))
-              {
-                res.int_val = (strcasecmp (child_val1.str_val,
-                                           child_val2.str_val) != 0);
-              }
+              res.int_val = (strcasecmp (child_val1.str_val,
+                                         child_val2.str_val) != 0);
             else
-              {
-                res.int_val = (strcmp (child_val1.str_val,
-                                       child_val2.str_val) != 0);
-              }
+              res.int_val = (strcmp (child_val1.str_val,
+                                     child_val2.str_val) != 0);
           }
         else
           {
@@ -668,7 +485,7 @@ rec_sex_eval_node (rec_sex_t sex,
                 /* Integer comparison.  */
                 ATOI_VAL (op1, child_val1);
                 ATOI_VAL (op2, child_val2);
-            
+
                 res.type = REC_SEX_VAL_INT;
                 res.int_val = op1 != op2;
               }
@@ -688,15 +505,11 @@ rec_sex_eval_node (rec_sex_t sex,
             res.type = REC_SEX_VAL_INT;
 
             if (rec_sex_parser_case_insensitive (sex->parser))
-              {
-                res.int_val =
-                  rec_match_insensitive (child_val1.str_val, child_val2.str_val);
-              }
+              res.int_val =
+                rec_match_insensitive (child_val1.str_val, child_val2.str_val);
             else
-              {
-                res.int_val =
-                  rec_match (child_val1.str_val, child_val2.str_val);
-              }
+              res.int_val =
+                rec_match (child_val1.str_val, child_val2.str_val);
           }
         else
           {
@@ -794,30 +607,22 @@ rec_sex_eval_node (rec_sex_t sex,
             res.type = REC_SEX_VAL_INT;
 
             if (rec_sex_ast_node_type (node) == REC_SEX_OP_LT)
-              {
-                res.int_val = op1_real < op2_real;
-              }
+              res.int_val = op1_real < op2_real;
             else
-              {
-                res.int_val = op1_real <= op2_real;
-              }
+              res.int_val = op1_real <= op2_real;
           }
         else
           {
             /* Integer comparison.  */
             ATOI_VAL (op1, child_val1);
             ATOI_VAL (op2, child_val2);
-            
+
             res.type = REC_SEX_VAL_INT;
 
             if (rec_sex_ast_node_type (node) == REC_SEX_OP_LT)
-              {
-                res.int_val = op1 < op2;
-              }
+              res.int_val = op1 < op2;
             else
-              {
-                res.int_val = op1 <= op2;
-              }
+              res.int_val = op1 <= op2;
           }
 
         break;
@@ -842,30 +647,22 @@ rec_sex_eval_node (rec_sex_t sex,
             res.type = REC_SEX_VAL_INT;
 
             if (rec_sex_ast_node_type (node) == REC_SEX_OP_GT)
-              {
-                res.int_val = op1_real > op2_real;
-              }
+              res.int_val = op1_real > op2_real;
             else
-              {
-                res.int_val = op1_real >= op2_real;
-              }
+              res.int_val = op1_real >= op2_real;
           }
         else
           {
             /* Integer comparison.  */
             ATOI_VAL (op1, child_val1);
             ATOI_VAL (op2, child_val2);
-            
+
             res.type = REC_SEX_VAL_INT;
 
             if (rec_sex_ast_node_type (node) == REC_SEX_OP_GT)
-              {
-                res.int_val = op1 > op2;
-              }
+              res.int_val = op1 > op2;
             else
-              {
-                res.int_val = op1 >= op2;
-              }
+              res.int_val = op1 >= op2;
           }
 
         break;
@@ -906,7 +703,7 @@ rec_sex_eval_node (rec_sex_t sex,
       {
         size_t str1_size;
         size_t str2_size;
-        
+
         GET_CHILD_VAL (child_val1, 0);
         GET_CHILD_VAL (child_val2, 1);
 
@@ -965,7 +762,6 @@ rec_sex_eval_node (rec_sex_t sex,
           {
             /* Compound a field name from the name/subname pair in the
                AST node.  */
-            
             char *effective_name
               = rec_concat_strings (field_name, "_", field_subname);
 
@@ -974,9 +770,7 @@ rec_sex_eval_node (rec_sex_t sex,
             free (effective_name);
           }
         else
-          {
-            n = rec_record_get_num_fields_by_name (record, field_name);
-          }
+          n = rec_record_get_num_fields_by_name (record, field_name);
 
         res.type = REC_SEX_VAL_INT;
         res.int_val = n;
@@ -996,13 +790,9 @@ rec_sex_eval_node (rec_sex_t sex,
         /* Return the first or the second operand, depending on the
            value of op1.  */
         if (op1)
-          {
-            res = child_val2;
-          }
+          res = child_val2;
         else
-          {
-            res = child_val3;
-          }
+          res = child_val3;
 
         break;
       }
@@ -1045,14 +835,11 @@ rec_sex_eval_node (rec_sex_t sex,
             index = rec_sex_ast_node_index (node);
             tofix = (index != -1);
             if (index == -1)
-              {
-                index = 0;
-              }
+              index = 0;
 
             /* If there is a subname then the effective field name is
                the concatenation of the name and the subname separated
                by a '_' character.  Otherwise it is just the name.  */
-
             {
               if (field_subname)
                 {
@@ -1065,27 +852,19 @@ rec_sex_eval_node (rec_sex_t sex,
                   field = rec_record_get_field_by_name (record, effective_field_name, index);
                 }
               else
-                {
-                  field = rec_record_get_field_by_name (record, field_name, index);
-                }
+                field = rec_record_get_field_by_name (record, field_name, index);
             }
 
             res.type = REC_SEX_VAL_STR;
             if (field)
-              {
-                res.str_val = strdup (rec_field_value (field));
-              }
+              res.str_val = strdup (rec_field_value (field));
             else
-              {
-                /* No field => ""  */
-                res.str_val = "";
-              }
+              /* No field => ""  */
+              res.str_val = "";
 
             if (tofix)
-              {
-                /* Make this node fixed.  */
-                rec_sex_ast_node_fix (node, res.str_val);
-              }
+              /* Make this node fixed.  */
+              rec_sex_ast_node_fix (node, res.str_val);
           }
 
         break;
@@ -1095,79 +874,188 @@ rec_sex_eval_node (rec_sex_t sex,
   return res;
 }
 
-static bool
-rec_sex_op_real_p (struct rec_sex_val_s op1,
-                   struct rec_sex_val_s op2)
+rec_sex_t
+rec_sex_new (bool case_insensitive)
 {
-  bool ret;
-  int integer;
-  double real;
+  rec_sex_t new;
 
-  ret = true;
-
-  if ((op1.type == REC_SEX_VAL_INT)
-      || ((op1.type == REC_SEX_VAL_STR)
-          && rec_atoi (op1.str_val, &integer)))
+  new = malloc (sizeof (struct rec_sex_s));
+  if (new)
     {
-      /* Operand 1 is an integer.  */
-      switch (op2.type)
-        {
-        case REC_SEX_VAL_INT:
-          {
-            ret = false;
-            break;
-          }
-        case REC_SEX_VAL_REAL:
-          {
-            ret = true;
-            break;
-          }
-        case REC_SEX_VAL_STR:
-          {
-            ret = (rec_atod (op2.str_val, &real)
-                   && (!rec_atoi (op2.str_val, &integer)));
-            break;
-          }
-        default:
-          {
-            ret = false;
-            break;
-          }
-        }
+      /* Initialize a new parser.  */
+      new->parser = rec_sex_parser_new ();
+      rec_sex_parser_set_case_insensitive (new->parser,
+                                           case_insensitive);
+
+      /* Initialize a new AST.  */
+      new->ast = NULL;
     }
 
-  if ((op1.type == REC_SEX_VAL_REAL)
-      || ((op1.type == REC_SEX_VAL_STR)
-          && rec_atod (op1.str_val, &real)
-          && (!rec_atoi (op1.str_val, &integer))))
-    {
-      /* Operand 1 is a real.  */
-      switch (op2.type)
-        {
-        case REC_SEX_VAL_INT:
-          {
-            ret = true;
-            break;
-          }
-        case REC_SEX_VAL_REAL:
-          {
-            ret = true;
-            break;
-          }
-        case REC_SEX_VAL_STR:
-          {
-            ret = rec_atod (op2.str_val, &real);
-            break;
-          }
-        default:
-          {
-            ret = false;
-            break;
-          }
-        }
-    }
-
-  return ret;
+  return new;
 }
- 
-/* End of rec-sex.c */
+
+void
+rec_sex_destroy (rec_sex_t sex)
+{
+  if (sex)
+    {
+      if (sex->parser)
+        rec_sex_parser_destroy (sex->parser);
+
+      if (sex->ast)
+        rec_sex_ast_destroy (sex->ast);
+
+      free (sex);  /* yeah! :D */
+    }
+}
+
+bool
+rec_sex_compile (rec_sex_t sex,
+                 const char *expr)
+{
+  bool res;
+
+  res = rec_sex_parser_run (sex->parser, expr);
+  if (res)
+    sex->ast = rec_sex_parser_ast (sex->parser);
+
+  return res;
+}
+
+#define EXEC_AST(RECORD)                                                \
+  do                                                                    \
+    {                                                                   \
+      val = rec_sex_eval_node (sex,                                     \
+                               (RECORD),                                \
+                               rec_sex_ast_top (sex->ast),              \
+                               status);                                 \
+                                                                        \
+      switch (val.type)                                                 \
+        {                                                               \
+        case REC_SEX_VAL_INT:                                           \
+          {                                                             \
+            res = (val.int_val != 0);                                   \
+            break;                                                      \
+          }                                                             \
+        case REC_SEX_VAL_REAL:                                          \
+        case REC_SEX_VAL_STR:                                           \
+          {                                                             \
+            res = false;                                                \
+            break;                                                      \
+          }                                                             \
+        }                                                               \
+    }                                                                   \
+  while (0)
+
+char *
+rec_sex_eval_str (rec_sex_t sex,
+                  rec_record_t record)
+{
+  char *res;
+  struct rec_sex_val_s val;
+  bool status;
+
+  rec_sex_ast_node_unfix (rec_sex_ast_top (sex->ast));
+  val = rec_sex_eval_node (sex,
+                           record,
+                           rec_sex_ast_top (sex->ast),
+                           &status);
+
+  if (!status)
+    /* Error evaluating the expression.  */
+    return NULL;
+
+  res = NULL;
+  switch (val.type)
+    {
+    case REC_SEX_VAL_INT:
+      asprintf (&res, "%d", val.int_val);
+      break;
+    case REC_SEX_VAL_REAL:
+      asprintf (&res, "%f", val.real_val);
+      break;
+    case REC_SEX_VAL_STR:
+      res = strdup (val.str_val);
+      break;
+    }
+
+  return res;
+}
+
+bool
+rec_sex_eval (rec_sex_t sex,
+              rec_record_t record,
+              bool *status)
+{
+  bool res;
+  rec_field_t field;
+  rec_field_t wfield;
+  rec_record_t wrec;
+  rec_mset_iterator_t iter;
+  int j, nf;
+  struct rec_sex_val_s val;
+
+  res = false;
+  wrec = NULL;
+
+  rec_sex_ast_node_unfix (rec_sex_ast_top (sex->ast));
+  EXEC_AST (record);
+  if (res)
+    goto exit;
+
+  rec_record_reset_marks (record);
+
+  iter = rec_mset_iterator (rec_record_mset (record));
+  while (rec_mset_iterator_next (&iter, MSET_FIELD, (const void**) &field, NULL))
+    {
+      nf = rec_record_get_num_fields_by_name (record, rec_field_name (field));
+      if ((nf > 1)
+          && (rec_record_field_mark (record, field) == 0)
+          && (rec_sex_ast_name_p (sex->ast, rec_field_name (field), nf))
+          && (!rec_sex_ast_hash_name_p (sex->ast, rec_field_name (field))))
+        {
+          for (j = 0; j < nf; j++)
+            {
+              wfield = rec_record_get_field_by_name (record,
+                                                     rec_field_name (field),
+                                                     j);
+              if (wrec)
+                rec_record_destroy (wrec);
+
+              rec_record_mark_field (record, wfield, 1);
+
+              wrec = rec_record_dup (record);
+              rec_record_remove_field_by_name (wrec,
+                                               rec_field_name (field),
+                                               -1); /* Delete all.  */
+              rec_mset_append (rec_record_mset (wrec),
+                               MSET_FIELD,
+                               (void *) rec_field_dup (wfield),
+                               MSET_ANY);
+
+              EXEC_AST(wrec);
+
+              if (res)
+                {
+                  rec_record_destroy (wrec);
+                  goto exit;
+                }
+            }
+        }
+    }
+
+  rec_mset_iterator_free (&iter);
+
+ exit:
+
+  if (!*status)
+    res = false;
+
+  return res;
+}
+
+void
+rec_sex_print_ast (rec_sex_t sex)
+{
+  rec_sex_parser_print_ast (sex->parser);
+}

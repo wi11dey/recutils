@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         recins.c
- *       Date:         Mon Dec 28 08:54:38 2009
- *
- *       GNU recutils - recins
- *
- */
+/* recins.c - Inserting records.  */
 
-/* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
- * 2018, 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2009-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,10 +31,6 @@
 
 #include <rec.h>
 #include <recutl.h>
-
-/* Forward declarations.  */
-bool recins_insert_record (rec_db_t db, char *type, rec_record_t record);
-void recins_parse_args (int argc, char **argv);
 
 /*
  * Global variables
@@ -179,95 +167,75 @@ void recins_parse_args (int argc,
           COMMON_ARGS_CASES
           RECORD_SELECTION_ARGS_CASES
         case FORCE_ARG:
-          {
-            recins_force = true;
-            break;
-          }
+          recins_force = true;
+          break;
         case VERBOSE_ARG:
-          {
-            recins_verbose = true;
-            break;
-          }
+          recins_verbose = true;
+          break;
         case NAME_ARG:
         case 'f':
-          {
-            if (field != NULL)
-              {
-                recutl_fatal (_("a -f should be followed by a -v\n"));
-                exit (EXIT_FAILURE);
-              }
+          if (field != NULL)
+            {
+              recutl_fatal (_("a -f should be followed by a -v\n"));
+              exit (EXIT_FAILURE);
+            }
 
-            if (recins_record == NULL)
-              {
-                recins_record = rec_record_new ();
-                rec_record_set_source (recins_record, "cmdli");
-                rec_record_set_location (recins_record, 0);
-              }
+          if (recins_record == NULL)
+            {
+              recins_record = rec_record_new ();
+              rec_record_set_source (recins_record, "cmdli");
+              rec_record_set_location (recins_record, 0);
+            }
 
-            if (!rec_field_name_p (optarg))
-              {
-                recutl_fatal (_("invalid field name %s.\n"), optarg);
-              }
-            
-            field = rec_field_new (optarg, "foo");
-            break;
-          }
+          if (!rec_field_name_p (optarg))
+            recutl_fatal (_("invalid field name %s.\n"), optarg);
+
+          field = rec_field_new (optarg, "foo");
+          break;
         case VALUE_ARG:
         case 'v':
-          {
-            if (field == NULL)
-              {
-                recutl_fatal (_("a -v should be preceded by a -f\n"));
-              }
+          if (field == NULL)
+            recutl_fatal (_("a -v should be preceded by a -f\n"));
 
-            rec_field_set_value (field, optarg);
-            rec_mset_append (rec_record_mset (recins_record), MSET_FIELD, (void *) field, MSET_ANY);
-
-            field = NULL;
-            break;
-          }
+          rec_field_set_value (field, optarg);
+          rec_mset_append (rec_record_mset (recins_record), MSET_FIELD, (void *) field, MSET_ANY);
+          field = NULL;
+          break;
         case NO_EXTERNAL_ARG:
-          {
-            recins_external = false;
-            break;
-          }
+          recins_external = false;
+          break;
         case NO_AUTO_ARG:
-          {
-            recins_auto = false;
-            break;
-          }
+          recins_auto = false;
+          break;
 #if defined REC_CRYPT_SUPPORT
         case PASSWORD_ARG:
         case 's':
-          {
-            if (recins_password != NULL)
-              {
-                recutl_fatal (_("more than one password was specified\n"));
-              }
+          if (recins_password != NULL)
+            recutl_fatal (_("more than one password was specified\n"));
 
-            recins_password = xstrdup (optarg);
-            break;
-          }
+          recins_password = xstrdup (optarg);
+          break;
 #endif
         case RECORD_ARG:
         case 'r':
-          {
-            /* Parse the provided record and put it in recins_record.  */
-            provided_record = rec_parse_record_str (optarg);
-            if (!provided_record)
-              {
-                recutl_fatal (_("error while parsing the record provided by -r\n"));
-              }
+          /* Parse the provided record and put it in recins_record.  */
+          provided_record = rec_parse_record_str (optarg);
+          if (!provided_record)
+            recutl_fatal (_("error while parsing the record provided by -r\n"));
 
-            if (recins_record)
-              {
-                /* Append the fields in provided_record into
-                   recins_record.  */
-                
-                rec_mset_iterator_t iter = rec_mset_iterator (rec_record_mset (provided_record));
-                while (rec_mset_iterator_next (&iter, MSET_FIELD, (const void **) &field, NULL))
+          if (recins_record)
+            {
+              /* Append the fields in provided_record into
+                 recins_record.  */
+
+              rec_mset_iterator_t iter = rec_mset_iterator (rec_record_mset (provided_record));
+              while (rec_mset_iterator_next (&iter, MSET_FIELD,
+                                             (const void **) &field, NULL))
                   {
-                    rec_mset_append (rec_record_mset (recins_record), MSET_FIELD, (void *) rec_field_dup (field), MSET_ANY);
+                    rec_mset_append (rec_record_mset (recins_record),
+                                     MSET_FIELD,
+                                     (void *) rec_field_dup (field),
+                                     MSET_ANY);
                     field = NULL;
                   }
                 rec_mset_iterator_free (&iter);
@@ -276,28 +244,20 @@ void recins_parse_args (int argc,
                 provided_record = NULL;
               }
             else
-              {
-                recins_record = provided_record;
-              }
+              recins_record = provided_record;
 
-            break;
-          }
+          break;
         default:
-          {
-            exit (EXIT_FAILURE);
-          }
+          exit (EXIT_FAILURE);
         }
     }
 
   if (field != NULL)
-    {
-      recutl_fatal (_("please provide a value for the field %s\n"), field_name);
-    }
+    recutl_fatal (_("please provide a value for the field %s\n"), field_name);
 
   /* Read the name of the file where to make the insertions.  */
   if (optind < argc)
     {
-
       if ((argc - optind) != 1)
         {
           recutl_print_help ();
@@ -325,26 +285,24 @@ recins_add_new_record (rec_db_t db)
     if (recutl_type)
       {
         rset = rec_db_get_rset_by_type (db, recutl_type);
-    
+
         if (rset)
           {
             confidential_fields = rec_rset_confidential (rset);
             if (!confidential_fields)
               recutl_out_of_memory ();
-            
+
             if (rec_fex_size (confidential_fields) > 0)
               {
                 if (!recins_password && recutl_interactive ())
                   {
                     recins_password = recutl_getpass (true);
                     if (!recins_password)
-                      {
-                        recutl_fatal ("not in an interactive terminal.\n");
-                      }
+                      recutl_fatal ("not in an interactive terminal.\n");
                   }
-                
+
                 /* Passwords can't be empty.  */
-                
+
                 if (recins_password && (strlen (recins_password) == 0))
                   {
                     free (recins_password);
@@ -361,14 +319,10 @@ recins_add_new_record (rec_db_t db)
      requested insertion/replacement operation.  */
 
   if (recutl_insensitive)
-    {
-      flags = flags | REC_F_ICASE;
-    }
+    flags = flags | REC_F_ICASE;
 
   if (!recins_auto)
-    {
-      flags = flags | REC_F_NOAUTO;
-    }
+    flags = flags | REC_F_NOAUTO;
 
   if (!rec_db_insert (db,
                       recutl_type,
@@ -384,9 +338,7 @@ recins_add_new_record (rec_db_t db)
   /* Check for the integrity of the resulting database.  */
 
   if (!recins_force && db)
-    {
-      recutl_check_integrity (db, recins_verbose, recins_external);
-    }
+    recutl_check_integrity (db, recins_verbose, recins_external);
 }
 
 int
@@ -400,10 +352,8 @@ main (int argc, char *argv[])
 
   db = recutl_read_db_from_file (recins_file);
   if (!db)
-    {
-      /* Create an empty database.  */
-      db = rec_db_new ();
-    }
+    /* Create an empty database.  */
+    db = rec_db_new ();
   recins_add_new_record (db);
 
   if (!recutl_file_is_writable (recins_file))
@@ -415,5 +365,3 @@ main (int argc, char *argv[])
 
   return EXIT_SUCCESS;
 }
-
-/* End of recins.c */

@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-int.c
- *       Date:         Thu Jul 15 18:23:26 2010
- *
- *       GNU recutils - Data integrity.
- *
- */
+/* rec-int.c - Data integrity.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,37 +33,6 @@
 #include <rec.h>
 #include <rec-utils.h>
 
-/*
- * Forward references.
- */
-
-static int rec_int_check_descriptor (rec_rset_t rset, rec_buf_t errors);
-static int rec_int_check_record_key (rec_rset_t rset,
-                                     rec_record_t orig_record, rec_record_t record,
-                                     rec_buf_t errors);
-static int rec_int_check_record_types (rec_db_t db,
-                                       rec_rset_t rset,
-                                       rec_record_t record,
-                                       rec_buf_t errors);
-static int rec_int_check_record_mandatory (rec_rset_t rset, rec_record_t record,
-                                           rec_buf_t errors);
-static int rec_int_check_record_unique (rec_rset_t rset, rec_record_t record,
-                                        rec_buf_t errors);
-static int rec_int_check_record_prohibit (rec_rset_t rset, rec_record_t record,
-                                          rec_buf_t errors);
-static int rec_int_check_record_sex_constraints (rec_rset_t rset, rec_record_t record,
-                                                 rec_buf_t errors);
-static int rec_int_check_record_allowed (rec_rset_t rset, rec_record_t record,
-                                         rec_buf_t errors);
-
-#if defined REC_CRYPT_SUPPORT
-static int rec_int_check_record_secrets (rec_rset_t rset, rec_record_t record,
-                                         rec_buf_t errors);
-#endif
-
-static int rec_int_merge_remote (rec_rset_t rset, rec_buf_t errors);
-static bool rec_int_rec_type_p (const char *str);
-
 /* The following macros are used by some functions in this file to
    reduce verbosity.  */
 
@@ -88,244 +49,6 @@ static bool rec_int_rec_type_p (const char *str);
         }                                               \
     }                                                   \
   while (0)
-
-/*
- * Public functions.
- */
-
-int
-rec_int_check_db (rec_db_t db,
-                  bool check_descriptors_p,
-                  bool remote_descriptors_p,
-                  rec_buf_t errors)
-{
-  int ret;
-  size_t db_size;
-  size_t n_rset;
-  rec_rset_t rset;
-  
-  ret = 0;
-
-  db_size = rec_db_size (db);
-  for (n_rset = 0; n_rset < db_size; n_rset++)
-    {
-      rset = rec_db_get_rset (db, n_rset);
-      ret = ret + rec_int_check_rset (db,
-                                      rset,
-                                      check_descriptors_p,
-                                      remote_descriptors_p,
-                                      errors);
-    }
-
-  return ret;
-}
-
-int
-rec_int_check_rset (rec_db_t db,
-                    rec_rset_t rset,
-                    bool check_descriptor_p,
-                    bool remote_descriptor_p,
-                    rec_buf_t errors)
-{
-  int res;
-  rec_mset_iterator_t iter;
-  rec_record_t record;
-  rec_record_t descriptor;
-  size_t num_records, min_records, max_records;
-
-  res = 0;
-
-  if (remote_descriptor_p
-      && (descriptor = rec_rset_descriptor (rset)))
-    {
-      /* Make a backup of the record descriptor to restore it
-         later.  */
-      descriptor = rec_record_dup (descriptor);
-
-      /* Fetch the remote descriptor, if any, and merge it with the
-         local descriptor.  If there is any error, stop and report
-         it.  */
-      res = rec_int_merge_remote (rset, errors);
-      if (res > 0)
-        {
-          return res;
-        }
-    }
-
-  if (check_descriptor_p)
-    {
-      res += rec_int_check_descriptor (rset, errors);
-    }
-
-  if (res > 0)
-    {
-      /* Stop here, since a lot of errors in the records will be
-         generated due to errors in the record descriptor.  */
-      return res;
-    }
-
-  /* Verify rset size restrictions.  */
-  num_records = rec_rset_num_records (rset);
-  min_records = rec_rset_min_records (rset);
-  max_records = rec_rset_max_records (rset);
-
-  if (min_records == max_records)
-    {
-      if (num_records != min_records)
-        {
-          ADD_ERROR (errors,
-                     _("%s: error: the number of records of type %s should be %zd.\n"),
-                     rec_rset_source (rset), rec_rset_type (rset), min_records);
-          res++;
-        }
-    }
-  else
-    {
-      if (num_records > rec_rset_max_records (rset))
-        {
-          ADD_ERROR (errors,
-                     _("%s: error: too many records of type %s. Maximum allowed are %zd.\n"),
-                     rec_rset_source (rset), rec_rset_type (rset), rec_rset_max_records (rset));
-          res++;
-        }
-      if (num_records < rec_rset_min_records (rset))
-        {
-          ADD_ERROR (errors,
-                     _("%s: error: too few records of type %s. Minimum allowed are %zd.\n"),
-                    rec_rset_source (rset), rec_rset_type (rset), rec_rset_min_records (rset));
-          res++;
-        }
-    }
-  
-  iter = rec_mset_iterator (rec_rset_mset (rset));
-  while (rec_mset_iterator_next (&iter, MSET_RECORD, (const void **) &record, NULL))
-    {
-      res += rec_int_check_record (db,
-                                   rset,
-                                   record, record,
-                                   errors);
-    }
-
-  rec_mset_iterator_free (&iter);
-
-  if (remote_descriptor_p)
-    {
-      /* Restore the original descriptor in the record set.  */
-      rec_rset_set_descriptor (rset, descriptor);
-    }
-
-  return res;
-}
-
-int
-rec_int_check_record (rec_db_t db,
-                      rec_rset_t rset,
-                      rec_record_t orig_record,
-                      rec_record_t record,
-                      rec_buf_t errors)
-{
-  int res;
-
-  res =
-    rec_int_check_record_key (rset, orig_record, record, errors)
-    + rec_int_check_record_types     (db, rset, record, errors)
-    + rec_int_check_record_mandatory (rset, record, errors)
-    + rec_int_check_record_unique    (rset, record, errors)
-#if defined REC_CRYPT_SUPPORT
-    + rec_int_check_record_secrets   (rset, record, errors)
-#endif
-    + rec_int_check_record_prohibit  (rset, record, errors)
-    + rec_int_check_record_sex_constraints (rset, record, errors)
-    + rec_int_check_record_allowed   (rset, record, errors);
-
-  return res;
-}
-
-bool
-rec_int_check_field_type (rec_db_t db,
-                          rec_rset_t rset,
-                          rec_field_t field,
-                          rec_buf_t errors)
-{
-  bool res = true;
-  rec_type_t type;
-  char *errors_str;
-
-  res = true;
-
-
-  /* Get the proper type to check 'field' with, checking with the type
-     from the type registry of 'rset', if any.  */
-
-  type = rec_rset_get_field_type (rset, rec_field_name (field));
-
-  /* Check the field with the type.  This is done by simply invoking
-     rec_type_check on the field value.  An exception to this is the
-     'rec' type.  The 'rec' type is used to implement foreign keys,
-     and its effect on the type integrity system is that the value of
-     the field must be considered to be of whatever type the primary
-     key of the referred record set is.  */
-
-  if (type)
-    {
-      if (rec_type_kind (type) == REC_TYPE_REC)
-        {
-          /* Get the name of the referred record set.  Check the type
-             if and only if:
-             
-             - The referred rset exists in DB and
-             - The referred rset has a primary key.
-             - The primary key of the referred rset has a type.
-          */
-
-          const char *rset_type = rec_type_rec (type);
-          rec_rset_t rset = rec_db_get_rset_by_type (db, rset_type);
-
-          if (rset)
-            {
-              const char *key = rec_rset_key (rset);
-              rec_type_t key_type = rec_rset_get_field_type (rset, key);
-
-              if (key_type)
-                {
-                  if (!rec_type_check (key_type, rec_field_value (field), &errors_str))
-                    {
-                      if (errors)
-                        {
-                          ADD_ERROR (errors,
-                                     "%s:%s: error: %s\n",
-                                     rec_field_source (field), rec_field_location_str (field),
-                                     errors_str);
-                        }
-                      free (errors_str);
-                      res = false;
-                    }
-                }
-            }
-        }
-      else
-        {
-          if (!rec_type_check (type, rec_field_value (field), &errors_str))
-            {
-              if (errors)
-                {
-                  ADD_ERROR (errors,
-                             "%s:%s: error: %s\n",
-                             rec_field_source (field), rec_field_location_str (field),
-                             errors_str);
-                }
-              free (errors_str);
-              res = false;
-            }
-        }
-    }
-
-  return res;
-}
-
-/*
- * Private functions
- */
 
 static rec_fex_t
 rec_int_collect_field_list (rec_record_t record,
@@ -382,9 +105,7 @@ rec_int_check_record_types (rec_db_t db,
     {
       /* Check for the type.  */
       if (!rec_int_check_field_type (db, rset, field, errors))
-        {
-          res++;
-        }
+        res++;
     }
 
   rec_mset_iterator_free (&iter);
@@ -400,7 +121,7 @@ rec_int_check_record_mandatory (rec_rset_t rset,
   rec_fex_t fex_mandatory = NULL;
   int res = 0;
   size_t i;
-  
+
   rec_record_t descriptor = rec_rset_descriptor (rset);
   if (descriptor)
     {
@@ -449,7 +170,7 @@ rec_int_check_record_allowed (rec_rset_t rset,
   rec_fex_t fex_allowed   = NULL;
   rec_fex_t fex_mandatory = NULL;
   rec_fex_t fex_key       = NULL;
-  
+
   int res = 0;
   rec_record_t descriptor = rec_rset_descriptor (rset);
 
@@ -473,7 +194,7 @@ rec_int_check_record_allowed (rec_rset_t rset,
 
       /* Make sure that all the fields in RECORD are in either
          %allowed, %mandatory or %key.  */
-          
+
       rec_field_t field = NULL;
       rec_mset_iterator_t iter = rec_mset_iterator (rec_record_mset (record));
       while (rec_mset_iterator_next (&iter, MSET_FIELD, (const void **) &field, NULL))
@@ -494,9 +215,9 @@ rec_int_check_record_allowed (rec_rset_t rset,
         }
       rec_mset_iterator_free (&iter);
     }
-  
+
  cleanup:
-  
+
   rec_fex_destroy (fex_allowed);
   rec_fex_destroy (fex_mandatory);
   rec_fex_destroy (fex_key);
@@ -676,7 +397,7 @@ rec_int_check_record_key (rec_rset_t rset,
   bool duplicated_key;
   size_t i;
   size_t num_fields;
-  
+
   res = 0;
 
   descriptor = rec_rset_descriptor (rset);
@@ -720,7 +441,7 @@ rec_int_check_record_key (rec_rset_t rset,
                                                       key_field_name,
                                                       0);
                   duplicated_key = false;
-                  
+
                   iter = rec_mset_iterator (rec_rset_mset (rset));
                   while (rec_mset_iterator_next (&iter, MSET_RECORD, (const void**) &other_record, NULL))
                     {
@@ -760,10 +481,25 @@ rec_int_check_record_key (rec_rset_t rset,
 
               free (key_field_name);
             }
-        }                                          
+        }
     }
 
   return res;
+}
+
+static bool
+rec_int_rec_type_p (const char *str)
+{
+  return rec_match (str,
+                    "^[ \t]*"
+                    REC_RECORD_TYPE_RE
+                    "[ \n\t]*"
+                    "("
+                    "(" REC_URL_REGEXP ")"
+                    "|"
+                    "(" REC_FILE_REGEXP ")"
+                    "[ \t]*)?"
+                    "$");
 }
 
 static int
@@ -887,7 +623,7 @@ before the type specification\n"),
                     {
                       /* The named type shall exist in the record set
                          type registry.
-                      
+
                          XXX: but this is probably a warning rather
                          than an error.  */
 
@@ -928,7 +664,7 @@ specification\n"),
                             rec_field_location_str (field));
                   res++;
                 }
-              
+
               /* Check the type descriptor.  Note that it can be
                  either a type specification or a type name.  */
               rec_skip_blanks (&p);
@@ -940,7 +676,7 @@ specification\n"),
                     {
                       /* The named type shall exist in the record set
                          type registry.
-                      
+
                          XXX: but this is probably a warning rather
                          than an error.  */
 
@@ -971,7 +707,7 @@ does not exist\n"),
             {
               /* Check that the value of this field is a valid
                  selection expression.  */
-              
+
               rec_sex_t sex = rec_sex_new (false);
               if (sex)
                 {
@@ -1049,7 +785,7 @@ does not exist\n"),
                   res++;
                 }
             }
-#endif /* REC_CRYPT_SUPPORT */          
+#endif /* REC_CRYPT_SUPPORT */
 
           if ((rec_field_name_equal_p (field_name, FNAME(REC_FIELD_AUTO)))
               && (fex = rec_fex_new (field_value, REC_FEX_SIMPLE)))
@@ -1147,7 +883,7 @@ rec_int_merge_remote (rec_rset_t rset,
               tmpfile_name[13] = '\0';
               tmpfile_des = gen_tempname (tmpfile_name, 0, 0, GT_FILE);
               external_file = fdopen (tmpfile_des, "r+");
-              
+
               /* Fetch the remote file.  */
               curl_easy_setopt (curl, CURLOPT_URL, rec_url);
               curl_easy_setopt (curl, CURLOPT_WRITEDATA, external_file);
@@ -1181,7 +917,7 @@ rec_int_merge_remote (rec_rset_t rset,
                   goto exit;
                 }
               rec_source = rec_file;
-            }              
+            }
 
           /* Parse the contents of the external file.  */
           fseek (external_file, 0, SEEK_SET);
@@ -1196,7 +932,7 @@ rec_int_merge_remote (rec_rset_t rset,
               goto exit;
             }
           rec_parser_destroy (parser);
-          
+
           /* Get the proper external descriptor and merge it with
              the local one.  */
           remote_rset = rec_db_get_rset_by_type (remote_db, rec_type);
@@ -1211,29 +947,29 @@ rec_int_merge_remote (rec_rset_t rset,
             }
           remote_descriptor = rec_rset_descriptor (remote_rset);
           if (!remote_descriptor)
-            {
-              /* Do nothing.  */
-              goto exit;
-            }
-          
+            /* Do nothing.  */
+            goto exit;
+
           iter = rec_mset_iterator (rec_record_mset (remote_descriptor));
           while (rec_mset_iterator_next (&iter, MSET_FIELD, (const void**) &remote_field, NULL))
             {
               /* Merge the descriptors, but take care to not add a new
                  %rec: field.  */
 
-              if (!rec_field_name_equal_p (rec_field_name (remote_field), FNAME(REC_FIELD_REC)))
-                {
-                  rec_mset_append (rec_record_mset (descriptor), MSET_FIELD, (void *) rec_field_dup (remote_field), MSET_ANY);
-                }
+              if (!rec_field_name_equal_p (rec_field_name (remote_field),
+                                           FNAME(REC_FIELD_REC)))
+                rec_mset_append (rec_record_mset (descriptor),
+                                 MSET_FIELD,
+                                 (void *) rec_field_dup (remote_field),
+                                 MSET_ANY);
             }
 
           rec_mset_iterator_free (&iter);
-          
+
           /* Update the record descriptor (triggering the creation
              of a new type registry).  */
           rec_rset_set_descriptor (rset, rec_record_dup (descriptor));
-          
+
           rec_db_destroy (remote_db);
           fclose (external_file);
         }
@@ -1252,19 +988,217 @@ rec_int_merge_remote (rec_rset_t rset,
   return res;
 }
 
-static bool
-rec_int_rec_type_p (const char *str)
+int
+rec_int_check_db (rec_db_t db,
+                  bool check_descriptors_p,
+                  bool remote_descriptors_p,
+                  rec_buf_t errors)
 {
-  return rec_match (str,
-                    "^[ \t]*"
-                    REC_RECORD_TYPE_RE
-                    "[ \n\t]*"
-                    "("
-                    "(" REC_URL_REGEXP ")"
-                    "|"
-                    "(" REC_FILE_REGEXP ")"
-                    "[ \t]*)?"
-                    "$");
+  int ret;
+  size_t db_size;
+  size_t n_rset;
+  rec_rset_t rset;
+
+  ret = 0;
+
+  db_size = rec_db_size (db);
+  for (n_rset = 0; n_rset < db_size; n_rset++)
+    {
+      rset = rec_db_get_rset (db, n_rset);
+      ret = ret + rec_int_check_rset (db,
+                                      rset,
+                                      check_descriptors_p,
+                                      remote_descriptors_p,
+                                      errors);
+    }
+
+  return ret;
 }
 
-/* End of rec-int.c */
+int
+rec_int_check_rset (rec_db_t db,
+                    rec_rset_t rset,
+                    bool check_descriptor_p,
+                    bool remote_descriptor_p,
+                    rec_buf_t errors)
+{
+  int res;
+  rec_mset_iterator_t iter;
+  rec_record_t record;
+  rec_record_t descriptor;
+  size_t num_records, min_records, max_records;
+
+  res = 0;
+
+  if (remote_descriptor_p
+      && (descriptor = rec_rset_descriptor (rset)))
+    {
+      /* Make a backup of the record descriptor to restore it
+         later.  */
+      descriptor = rec_record_dup (descriptor);
+
+      /* Fetch the remote descriptor, if any, and merge it with the
+         local descriptor.  If there is any error, stop and report
+         it.  */
+      res = rec_int_merge_remote (rset, errors);
+      if (res > 0)
+        return res;
+    }
+
+  if (check_descriptor_p)
+    res += rec_int_check_descriptor (rset, errors);
+
+  if (res > 0)
+    /* Stop here, since a lot of errors in the records will be
+       generated due to errors in the record descriptor.  */
+      return res;
+
+  /* Verify rset size restrictions.  */
+  num_records = rec_rset_num_records (rset);
+  min_records = rec_rset_min_records (rset);
+  max_records = rec_rset_max_records (rset);
+
+  if (min_records == max_records)
+    {
+      if (num_records != min_records)
+        {
+          ADD_ERROR (errors,
+                     _("%s: error: the number of records of type %s should be %zd.\n"),
+                     rec_rset_source (rset), rec_rset_type (rset), min_records);
+          res++;
+        }
+    }
+  else
+    {
+      if (num_records > rec_rset_max_records (rset))
+        {
+          ADD_ERROR (errors,
+                     _("%s: error: too many records of type %s. Maximum allowed are %zd.\n"),
+                     rec_rset_source (rset), rec_rset_type (rset), rec_rset_max_records (rset));
+          res++;
+        }
+      if (num_records < rec_rset_min_records (rset))
+        {
+          ADD_ERROR (errors,
+                     _("%s: error: too few records of type %s. Minimum allowed are %zd.\n"),
+                    rec_rset_source (rset), rec_rset_type (rset), rec_rset_min_records (rset));
+          res++;
+        }
+    }
+
+  iter = rec_mset_iterator (rec_rset_mset (rset));
+  while (rec_mset_iterator_next (&iter, MSET_RECORD, (const void **) &record, NULL))
+    {
+      res += rec_int_check_record (db,
+                                   rset,
+                                   record, record,
+                                   errors);
+    }
+
+  rec_mset_iterator_free (&iter);
+
+  if (remote_descriptor_p)
+    /* Restore the original descriptor in the record set.  */
+    rec_rset_set_descriptor (rset, descriptor);
+
+  return res;
+}
+
+int
+rec_int_check_record (rec_db_t db,
+                      rec_rset_t rset,
+                      rec_record_t orig_record,
+                      rec_record_t record,
+                      rec_buf_t errors)
+{
+  int res;
+
+  res =
+    rec_int_check_record_key (rset, orig_record, record, errors)
+    + rec_int_check_record_types     (db, rset, record, errors)
+    + rec_int_check_record_mandatory (rset, record, errors)
+    + rec_int_check_record_unique    (rset, record, errors)
+#if defined REC_CRYPT_SUPPORT
+    + rec_int_check_record_secrets   (rset, record, errors)
+#endif
+    + rec_int_check_record_prohibit  (rset, record, errors)
+    + rec_int_check_record_sex_constraints (rset, record, errors)
+    + rec_int_check_record_allowed   (rset, record, errors);
+
+  return res;
+}
+
+bool
+rec_int_check_field_type (rec_db_t db,
+                          rec_rset_t rset,
+                          rec_field_t field,
+                          rec_buf_t errors)
+{
+  bool res = true;
+  rec_type_t type;
+  char *errors_str;
+
+  res = true;
+
+
+  /* Get the proper type to check 'field' with, checking with the type
+     from the type registry of 'rset', if any.  */
+  type = rec_rset_get_field_type (rset, rec_field_name (field));
+
+  /* Check the field with the type.  This is done by simply invoking
+     rec_type_check on the field value.  An exception to this is the
+     'rec' type.  The 'rec' type is used to implement foreign keys,
+     and its effect on the type integrity system is that the value of
+     the field must be considered to be of whatever type the primary
+     key of the referred record set is.  */
+  if (type)
+    {
+      if (rec_type_kind (type) == REC_TYPE_REC)
+        {
+          /* Get the name of the referred record set.  Check the type
+             if and only if:
+
+             - The referred rset exists in DB and
+             - The referred rset has a primary key.
+             - The primary key of the referred rset has a type.
+          */
+          const char *rset_type = rec_type_rec (type);
+          rec_rset_t rset = rec_db_get_rset_by_type (db, rset_type);
+
+          if (rset)
+            {
+              const char *key = rec_rset_key (rset);
+              rec_type_t key_type = rec_rset_get_field_type (rset, key);
+
+              if (key_type)
+                {
+                  if (!rec_type_check (key_type, rec_field_value (field), &errors_str))
+                    {
+                      if (errors)
+                        ADD_ERROR (errors,
+                                   "%s:%s: error: %s\n",
+                                   rec_field_source (field), rec_field_location_str (field),
+                                   errors_str);
+                      free (errors_str);
+                      res = false;
+                    }
+                }
+            }
+        }
+      else
+        {
+          if (!rec_type_check (type, rec_field_value (field), &errors_str))
+            {
+              if (errors)
+                ADD_ERROR (errors,
+                           "%s:%s: error: %s\n",
+                           rec_field_source (field), rec_field_location_str (field),
+                           errors_str);
+              free (errors_str);
+              res = false;
+            }
+        }
+    }
+
+  return res;
+}

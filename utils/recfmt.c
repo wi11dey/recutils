@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         recfmt.c
- *       Date:         Wed Dec 22 18:20:20 2010
- *
- *       GNU recutils - recfmt
- *
- */
+/* recfmt.c - Format records and generate reports.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,13 +28,6 @@
 
 #include <rec.h>
 #include <recutl.h>
-
-/* Forward prototypes.  */
-void recfmt_parse_args (int argc, char **argv);
-bool recfmt_process_data (rec_db_t db);
-void recfmt_process_db (rec_db_t db, char *template);
-char *recfmt_apply_template (rec_record_t record, char *template);
-char *recfmt_get_subst (rec_record_t record, char *str);
 
 /*
  * Global variables
@@ -115,22 +100,16 @@ recfmt_parse_args (int argc,
           COMMON_ARGS_CASES
         case FILE_ARG:
         case 'f':
-          {
-            /* Read the template from the specified file and store it
-               in recfmt_template.  */
+          /* Read the template from the specified file and store it in
+             recfmt_template.  */
             recfmt_template = recutl_read_file (optarg);
             if (!recfmt_template)
-              {
-                recutl_fatal (_("can't open file %s for reading.\n"),
-                              optarg);
-              }
+              recutl_fatal (_("can't open file %s for reading.\n"),
+                            optarg);
 
             break;
-          }
         default:
-          {
-            exit (EXIT_FAILURE);
-          }
+          exit (EXIT_FAILURE);
         }
     }
 
@@ -138,9 +117,8 @@ recfmt_parse_args (int argc,
   if (optind < argc)
     {
       if (recfmt_template)
-        {
-          recutl_fatal (_("don't specify a template in the command line and -f at the same time.\n"));
-        }
+        recutl_fatal (_("don't specify a template in the command line\
+ and -f at the same time.\n"));
 
       if ((argc - optind) != 1)
         {
@@ -161,15 +139,11 @@ recfmt_get_subst (rec_record_t record,
 
   sex = rec_sex_new (false);
   if (!rec_sex_compile (sex, str))
-    {
-      recutl_fatal (_("invalid expression in a template slot.\n"));
-    }
+    recutl_fatal (_("invalid expression in a template slot.\n"));
 
   res = rec_sex_eval_str (sex, record);
   if (!res)
-    {
-      recutl_fatal (_("error evaluating expression in a template slot.\n"));
-    }
+    recutl_fatal (_("error evaluating expression in a template slot.\n"));
 
   rec_sex_destroy (sex);
 
@@ -201,9 +175,8 @@ recfmt_apply_template (rec_record_t record,
   */
 
   if (regcomp (&regexp, "\\{\\{" "[^}]*" "\\}\\}", REG_EXTENDED) != 0)
-    {
-      recutl_fatal (_("recfmt_apply_template: error compiling regexp. Please report this.\n"));
-    }
+    recutl_fatal (_("recfmt_apply_template: error compiling regexp.\
+ Please report this.\n"));
 
   result_buf = rec_buf_new (&result, &result_size);
   p = template;
@@ -242,12 +215,9 @@ recfmt_apply_template (rec_record_t record,
 
   /* Add the epilog, if any.  */
   if (*p)
-    {
-      rec_buf_puts (p, result_buf);
-    }
-  
-  rec_buf_close (result_buf);
+    rec_buf_puts (p, result_buf);
 
+  rec_buf_close (result_buf);
   return result;
 }
 
@@ -268,7 +238,8 @@ recfmt_process_db (rec_db_t db, char *template)
       /* Iterate on all the records.  */
 
       iter = rec_mset_iterator (rec_rset_mset (rset));
-      while (rec_mset_iterator_next (&iter, MSET_RECORD, (const void**) &record, NULL))
+      while (rec_mset_iterator_next (&iter, MSET_RECORD,
+                                     (const void**) &record, NULL))
         {
           /* Apply the template to this record.  */
           result = recfmt_apply_template (record, template);
@@ -294,11 +265,7 @@ main (int argc, char *argv[])
 
   db = recutl_read_db_from_file (NULL);
   if (db && recfmt_template)
-    {
-      recfmt_process_db (db, recfmt_template);
-    }
+    recfmt_process_db (db, recfmt_template);
 
   return EXIT_SUCCESS;
 }
-
-/* End of recfmt.c */

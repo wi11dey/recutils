@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-field.c
- *       Date:         Fri Feb 27 20:40:26 2009
- *
- *       GNU recutils - Fields
- *
- */
+/* rec-field.c - Fields.  */
 
-/* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
- * 2018, 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2009-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,12 +33,10 @@ struct rec_field_s
 {
   /* The name and the value of a field are UTF-8 encoded strings.
      Thus, we use NULL-terminated strings to store them.  */
-
   char *name;
   char *value;
 
   /* Localization.  */
-
   char *source;
   size_t location;
   char *location_str;
@@ -54,17 +44,17 @@ struct rec_field_s
   char *char_location_str;
 
   /* Field marks.  */
-
   int mark;
 };
 
-/* Static functions defined below.  */
-
-static void rec_field_init (rec_field_t field);
-
-/*
- * Public functions.
- */
+static void
+rec_field_init (rec_field_t field)
+{
+  /* Initialize the field structure so it can be safely passed to
+     rec_field_destroy even if its contents are not completely
+     initialized with real values.  */
+  memset (field, 0 /* NULL */, sizeof (struct rec_field_s));
+}
 
 const char *
 rec_field_name (rec_field_t field)
@@ -121,7 +111,7 @@ rec_field_new (const char *name,
           return NULL;
         }
     }
-  
+
   return field;
 }
 
@@ -201,25 +191,20 @@ rec_field_to_comment (rec_field_t field)
 {
   rec_comment_t res;
   char *comment_str;
-  
+
   comment_str = rec_write_field_str (field,
                                      REC_WRITER_NORMAL);
   if (!comment_str)
-    {
-      return NULL;
-    }
+    return NULL;
 
   /* If the last character of the comment string is a newline, remove
      it.  */
-
   if (comment_str[strlen (comment_str) - 1] == '\n')
-    {
-      comment_str[strlen (comment_str) - 1] = '\0';
-    }
+    comment_str[strlen (comment_str) - 1] = '\0';
 
   res = rec_comment_new (comment_str);
   free (comment_str);
-  
+
   return res;
 }
 
@@ -257,18 +242,10 @@ rec_field_set_location (rec_field_t field,
 const char *
 rec_field_location_str (rec_field_t field)
 {
-  char *res;
-
   if (field->location_str)
-    {
-      res = field->location_str;
-    }
+    return field->location_str;
   else
-    {
-      res = "";
-    }
-
-  return res;
+    return "";
 }
 
 size_t
@@ -292,16 +269,11 @@ rec_field_char_location_str (rec_field_t field)
 {
   char *res;
 
+
   if (field->char_location_str)
-    {
-      res = field->char_location_str;
-    }
+    return field->char_location_str;
   else
-    {
-      res = "";
-    }
-  
-  return res;
+    return "";
 }
 
 void
@@ -315,19 +287,3 @@ rec_field_mark (rec_field_t field)
 {
   return field->mark;
 }
-
-/*
- * Private functions.
- */
-
-static void
-rec_field_init (rec_field_t field)
-{
-  /* Initialize the field structure so it can be safely passed to
-     rec_field_destroy even if its contents are not completely
-     initialized with real values.  */
-
-  memset (field, 0 /* NULL */, sizeof (struct rec_field_s));
-}
-
-/* End of rec-field.c */

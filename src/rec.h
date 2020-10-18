@@ -2262,5 +2262,3 @@ void rec_aggregate_reg_add_standard (rec_aggregate_reg_t func_reg);
 bool rec_aggregate_std_p (const char *name);
 
 #endif /* !GNU_REC_H */
-
-/* End of rec.h */

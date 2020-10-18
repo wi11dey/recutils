@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-sex.y
- *       Date:         Sat Jan  9 16:36:55 2010
- *
- *       GNU recutils - Selection Expressions parser
- *
- */
+/* rec-sex-tab.y - Selection Expressions parser.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +79,7 @@
           rec_sex_ast_node_link ((RES), (OP3));         \
         }                                               \
      while (0)
-  
+
 %}
 
 %union {
@@ -121,7 +113,7 @@
 
 %% /* The grammar follows.  */
 
-input: 
+input:
      exp
      {
        rec_sex_ast_t ast;
@@ -140,7 +132,7 @@ exp : REC_SEX_TOK_INT          { $$ = $1; }
                                { CREATE_NODE_OP3 (REC_SEX_OP_COND, $$, $1, $3, $5); }
     | exp REC_SEX_TOK_EQL exp  { CREATE_NODE_OP2 (REC_SEX_OP_EQL, $$, $1, $3); }
     | exp REC_SEX_TOK_NEQ exp  { CREATE_NODE_OP2 (REC_SEX_OP_NEQ, $$, $1, $3); }
-    | exp REC_SEX_TOK_MAT exp  
+    | exp REC_SEX_TOK_MAT exp
     {
       if ((rec_sex_ast_node_type ($1) == REC_SEX_INT)
           || (rec_sex_ast_node_type ($3) == REC_SEX_INT))
@@ -173,5 +165,3 @@ exp : REC_SEX_TOK_INT          { $$ = $1; }
     | REC_SEX_TOK_BP exp REC_SEX_TOK_EP { $$ = $2; }
 
 %%
-
-/* End of rec-sex.y */

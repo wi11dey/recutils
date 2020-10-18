@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         recdel.c
- *       Date:         Mon Dec 28 08:54:38 2009
- *
- *       GNU recutils - recdel
- *
- */
+/* recdel.c - Deleting records.  */
 
-/* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
- * 2018, 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2009-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,10 +27,6 @@
 
 #include <rec.h>
 #include <recutl.h>
-
-/* Forward declarations.  */
-void recdel_delete_records (rec_db_t db);
-void recdel_parse_args (int argc, char **argv);
 
 /*
  * Global variables
@@ -110,7 +98,7 @@ Remove (or comment out) records from a rec file.\n"),
          stdout);
 
   recutl_print_help_common ();
-  
+
   puts ("");
   recutl_print_help_record_selection ();
 
@@ -131,27 +119,19 @@ recdel_delete_records (rec_db_t db)
 {
   /* Make sure that the user selected an existing record set from
      which to delete records.  */
-
   if (!rec_db_type_p (db, recutl_type))
-    {
-      recutl_fatal (_("no records of type %s found.\n"),
-                    recutl_type ? recutl_type : "<default>");
-    }
+    recutl_fatal (_("no records of type %s found.\n"),
+                  recutl_type ? recutl_type : "<default>");
 
   /* Invoke the library to perform the requested deletions.  */
-
   {
     int flags = 0;
 
     if (recutl_insensitive)
-      {
-        flags = flags | REC_F_ICASE;
-      }
+      flags = flags | REC_F_ICASE;
 
     if (recdel_comment)
-      {
-        flags = flags | REC_F_COMMENT_OUT;
-      }
+      flags = flags | REC_F_COMMENT_OUT;
 
     if (!rec_db_delete (db,
                         recutl_type,
@@ -165,11 +145,8 @@ recdel_delete_records (rec_db_t db)
 
 
   /* Check the integrity of the resulting database.  */
-
   if (!recdel_force && db)
-    {
-      recutl_check_integrity (db, recdel_verbose, recdel_external);
-    }
+    recutl_check_integrity (db, recdel_verbose, recdel_external);
 }
 
 void
@@ -192,51 +169,41 @@ recdel_parse_args (int argc,
           COMMON_ARGS_CASES
           RECORD_SELECTION_ARGS_CASES
         case FORCE_ARG:
-          {
-            recdel_force = true;
-            break;
-          }
+          recdel_force = true;
+          break;
         case VERBOSE_ARG:
-          {
-            recdel_verbose = true;
-            break;
-          }
+          recdel_verbose = true;
+          break;
         case NO_EXTERNAL_ARG:
-          {
-            recdel_external = false;
-            break;
-          }
+          recdel_external = false;
+          break;
         case COMMENT_ARG:
         case 'c':
-          {
-            recdel_comment = true;
-            break;
-          }
+          recdel_comment = true;
+          break;
         default:
-          {
-            exit (EXIT_FAILURE);
-          }
+          exit (EXIT_FAILURE);
         }
     }
 
   /* Require the usage of --force for potentially dangerous
      operations, such as the request of deleting a whole record
      set.  */
-  
-  if ((recutl_num_indexes() == 0) && !recutl_sex_str && !recutl_quick_str && !recdel_force && (recutl_random == 0))
+
+  if ((recutl_num_indexes() == 0) && !recutl_sex_str && !recutl_quick_str
+      && !recdel_force && (recutl_random == 0))
     {
       recutl_error (_("ignoring a request to delete all records of type %s.\n"),
                     recutl_type ? recutl_type : "unknown");
-      recutl_fatal (_("use --force if you really want to proceed, or use either -n or -e.\n"));
+      recutl_fatal (_("use --force if you really want to proceed,\
+ or use either -n or -e.\n"));
     }
 
   if (recutl_sex_str)
     {
       recutl_sex = rec_sex_new (recutl_insensitive);
       if (!rec_sex_compile (recutl_sex, recutl_sex_str))
-        {
-          recutl_fatal (_("invalid selection expression.\n"));
-        }
+        recutl_fatal (_("invalid selection expression.\n"));
     }
 
   /* Read the name of the file where to delete the records.  */
@@ -263,14 +230,11 @@ main (int argc, char *argv[])
 
   db = recutl_read_db_from_file (recdel_file);
   if (!db)
-    {
-      recutl_fatal (_("cannot read file %s\n"), recdel_file);
-    }
+    recutl_fatal (_("cannot read file %s\n"), recdel_file);
 
-  if (((recutl_num_indexes() != 0) || recutl_sex || recutl_quick_str) || recdel_force || (recutl_random > 0))
-    {
-      recdel_delete_records (db);
-    }
+  if (((recutl_num_indexes() != 0) || recutl_sex || recutl_quick_str)
+      || recdel_force || (recutl_random > 0))
+    recdel_delete_records (db);
 
   if (!recutl_file_is_writable (recdel_file))
     {
@@ -281,5 +245,3 @@ main (int argc, char *argv[])
 
   return EXIT_SUCCESS;
 }
-
-/* End of recdel.c */

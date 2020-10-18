@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-sex-ast.c
- *       Date:         Tue Jan 12 17:29:03 2010
- *
- *       GNU recutils - SEX Abstract Syntax Trees
- *
- */
+/* rec-sex-ast.c - SEX Abstract Syntax Trees.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,10 +23,6 @@
 #include <stdio.h>
 
 #include <rec-sex-ast.h>
-
-/*
- * Data types
- */
 
 #define REC_SEX_AST_MAX_CHILDREN 3
 
@@ -60,10 +48,6 @@ struct rec_sex_ast_s
   rec_sex_ast_node_t top;
 };
 
-/*
- * Public functions
- */
-
 rec_sex_ast_t
 rec_sex_ast_new ()
 {
@@ -71,9 +55,7 @@ rec_sex_ast_new ()
 
   new = malloc (sizeof (struct rec_sex_ast_s));
   if (new)
-    {
-      new->top = NULL;
-    }
+    new->top = NULL;
 
   return new;
 }
@@ -82,10 +64,8 @@ void
 rec_sex_ast_destroy (rec_sex_ast_t ast)
 {
   if (ast->top)
-    {
-      rec_sex_ast_node_destroy (ast->top);
-    }
-  
+    rec_sex_ast_node_destroy (ast->top);
+
   free (ast);
 }
 
@@ -114,9 +94,7 @@ rec_sex_ast_node_destroy (rec_sex_ast_node_t node)
 
   /* Destroy children.  */
   for (i = 0; i < node->num_children; i++)
-    {
-      rec_sex_ast_node_destroy (node->children[i]);
-    }
+    rec_sex_ast_node_destroy (node->children[i]);
 
   /* Destroy values.  */
   if (node->type == REC_SEX_STR)
@@ -185,9 +163,7 @@ rec_sex_ast_node_set_str (rec_sex_ast_node_t node,
                           char *str)
 {
   if (node->type == REC_SEX_STR)
-    {
-      free (node->val.string);
-    }
+    free (node->val.string);
 
   node->type = REC_SEX_STR;
   node->val.string = strdup (str);
@@ -215,14 +191,12 @@ rec_sex_ast_node_set_name (rec_sex_ast_node_t node,
       free (node->val.name[0]);
       free (node->val.name[1]);
     }
- 
+
   node->type = REC_SEX_NAME;
   node->val.name[0] = strdup (name);
   node->val.name[1] = NULL;
   if (subname)
-    {
-      node->val.name[1] = strdup (subname);
-    }
+    node->val.name[1] = strdup (subname);
 }
 
 void
@@ -230,9 +204,7 @@ rec_sex_ast_node_link (rec_sex_ast_node_t parent,
                        rec_sex_ast_node_t child)
 {
   if (parent->num_children < REC_SEX_AST_MAX_CHILDREN)
-    {
-      parent->children[parent->num_children++] = child;
-    }
+    parent->children[parent->num_children++] = child;
 }
 
 rec_sex_ast_node_t
@@ -252,26 +224,18 @@ void
 rec_sex_ast_print_node (rec_sex_ast_node_t node)
 {
   int i;
-  
+
   for (i = 0; i < node->num_children; i++)
-    {
-      rec_sex_ast_print_node (node->children[i]);
-    }
+    rec_sex_ast_print_node (node->children[i]);
 
   printf ("------- node\n");
   printf ("type: %d\n", node->type);
   if (node->type == REC_SEX_INT)
-    {
-      printf("value: %d\n", node->val.integer);
-    }
+    printf("value: %d\n", node->val.integer);
   if (node->type == REC_SEX_NAME)
-    {
-      printf("value: %s\n", node->val.name[0]);
-    }
+    printf("value: %s\n", node->val.name[0]);
   if (node->type == REC_SEX_STR)
-    {
-      printf("value: %s\n", node->val.string);
-    }
+    printf("value: %s\n", node->val.string);
 
   printf("\n");
 }
@@ -290,9 +254,7 @@ rec_sex_ast_node_child (rec_sex_ast_node_t node,
 
   res = NULL;
   if (n < node->num_children)
-    {
-      res = node->children[n];
-    }
+    res = node->children[n];
 
   return res;
 }
@@ -303,9 +265,7 @@ rec_sex_ast_node_reset (rec_sex_ast_node_t node)
   int i;
 
   for (i = 0; i < node->num_children; i++)
-    {
-      rec_sex_ast_node_reset (node->children[i]);
-    }
+    rec_sex_ast_node_reset (node->children[i]);
 
   node->index = 0;
 }
@@ -325,9 +285,7 @@ rec_sex_ast_node_unfix (rec_sex_ast_node_t node)
   int i;
 
   for (i = 0; i < node->num_children; i++)
-    {
-      rec_sex_ast_node_unfix (node->children[i]);
-    }
+    rec_sex_ast_node_unfix (node->children[i]);
 
   node->fixed = false;
 }
@@ -375,16 +333,12 @@ rec_sex_ast_name_p_1 (rec_sex_ast_node_t node,
       if ((node->type == REC_SEX_NAME)
           && ((node->index == -1) || (node->index < idx))
           && (strcmp (name, node->val.name[0]) == 0))
-        {
-          return true;
-        }
+        return true;
 
       for (i = 0; i < node->num_children; i++)
         {
           if (rec_sex_ast_name_p_1 (node->children[i], name, idx))
-            {
-              return true;
-            }
+            return true;
         }
     }
 
@@ -398,10 +352,7 @@ rec_sex_ast_name_p (rec_sex_ast_t ast,
 {
   /* Traverse the AST looking for any name node NAME[I] where I <
      idx.  */
-
-  return rec_sex_ast_name_p_1 (ast->top,
-                               name,
-                               idx);
+  return rec_sex_ast_name_p_1 (ast->top, name, idx);
 }
 
 static bool
@@ -434,5 +385,3 @@ rec_sex_ast_hash_name_p (rec_sex_ast_t ast,
      REC_SEX_OP_SHA.  */
   return rec_sex_ast_hash_name_p_1 (ast->top, name);
 }
-
-/* End of rec-sex-ast.c */

@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         recsel.c
- *       Date:         Fri Jan  1 23:12:38 2010
- *
- *       GNU recutils - recsel
- *
- */
+/* recsel.c - Selecting records.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,10 +27,6 @@
 
 #include <rec.h>
 #include <recutl.h>
-
-/* Forward prototypes.  */
-void recsel_parse_args (int argc, char **argv);
-bool recsel_process_data (rec_db_t db);
 
 /*
  * Global variables
@@ -143,7 +131,7 @@ Select and print rec data.\n"), stdout);
   -s, --password=STR                  decrypt confidential fields with the given password.\n"),
          stdout);
 #endif
-  
+
   recutl_print_help_common ();
 
   puts ("");
@@ -200,183 +188,126 @@ recsel_parse_args (int argc,
         RECORD_SELECTION_ARGS_CASES
         case DESCRIPTOR_ARG:
         case 'd':
-          {
-            recsel_descriptors = true;
-            break;
-          }
+          recsel_descriptors = true;
+          break;
         case PRINT_SEXPS_ARG:
-          {
-            recsel_write_mode = REC_WRITER_SEXP;
-            break;
-          }
+          recsel_write_mode = REC_WRITER_SEXP;
+          break;
         case UNIQ_ARG:
         case 'U':
-          {
-            recsel_uniq = true;
-            break;
-          }
+          recsel_uniq = true;
+          break;
 #if defined REC_CRYPT_SUPPORT
         case PASSWORD_ARG:
         case 's':
-          {
-            if (recsel_password != NULL)
-              {
-                recutl_fatal (_("more than one password was specified\n"));
-              }
+          if (recsel_password != NULL)
+            recutl_fatal (_("more than one password was specified\n"));
 
-            recsel_password = xstrdup (optarg);
-            break;
-          }
+          recsel_password = xstrdup (optarg);
+          break;
 #endif
         case SORT_ARG:
         case 'S':
-          {
-            if (recutl_sort_by_fields)
-              {
-                recutl_fatal (_("only one field list can be specified as a sorting criteria.\n"));
-              }
+          if (recutl_sort_by_fields)
+            recutl_fatal (_("only one field list can be specified\
+ as a sorting criteria.\n"));
 
-            /* Parse the field name.  */
+          /* Parse the field name.  */
+          if (!rec_fex_check (optarg, REC_FEX_CSV))
+            recutl_fatal (_("invalid field names in -S.\n"));
 
-            if (!rec_fex_check (optarg, REC_FEX_CSV))
-              {
-                recutl_fatal (_("invalid field names in -S.\n"));
-              }
-
-            recutl_sort_by_fields = rec_fex_new (optarg, REC_FEX_CSV);
-            if (!recutl_sort_by_fields)
-              {
-                recutl_fatal (_("internal error creating fex.\n"));
-              }
-
-            break;
-          }
+          recutl_sort_by_fields = rec_fex_new (optarg, REC_FEX_CSV);
+          if (!recutl_sort_by_fields)
+            recutl_fatal (_("internal error creating fex.\n"));
+          break;
         case JOIN_ARG:
         case 'j':
-          {
-            if (recsel_join)
-              {
-                recutl_fatal (_("only one field can be specified as join criteria.\n"));
-              }
+          if (recsel_join)
+            recutl_fatal (_("only one field can be specified as join criteria.\n"));
 
-            if (!rec_field_name_p (optarg))
-              {
-                recutl_fatal (_("please specify a correct field name to -j|--join.\n"));
-              }
+          if (!rec_field_name_p (optarg))
+            recutl_fatal (_("please specify a correct field name to -j|--join.\n"));
 
-            recsel_join = xstrdup (optarg);
-            break;
-          }
+          recsel_join = xstrdup (optarg);
+          break;
         case GROUP_BY_ARG:
         case 'G':
-          {
-            if (recsel_group_by_fields)
-              {
-                recutl_fatal (_("only one field list can be specified as a grouping criteria.\n"));
-              }
+          if (recsel_group_by_fields)
+            recutl_fatal (_("only one field list can be specified as\
+ a grouping criteria.\n"));
 
-            /* Parse the field name.  */
-            if (!rec_fex_check (optarg, REC_FEX_CSV))
-              {
-                recutl_fatal (_("invalid field names in -G.\n"));
-              }
+          /* Parse the field name.  */
+          if (!rec_fex_check (optarg, REC_FEX_CSV))
+            recutl_fatal (_("invalid field names in -G.\n"));
 
-            recsel_group_by_fields = rec_fex_new (optarg, REC_FEX_CSV);
-            if (!recsel_group_by_fields)
-              {
-                recutl_fatal (_("internal error creating fex.\n"));
-              }
+          recsel_group_by_fields = rec_fex_new (optarg, REC_FEX_CSV);
+          if (!recsel_group_by_fields)
+            recutl_fatal (_("internal error creating fex.\n"));
 
-            break;
-          }
+          break;
         case PRINT_ARG:
         case PRINT_VALUES_ARG:
         case PRINT_IN_A_ROW_ARG:
         case 'p':
         case 'P':
         case 'R':
+          if (recsel_count)
+            recutl_fatal (_("cannot specify -[pPR] and also -c.\n"));
+
+          if ((c == 'P') || (c == PRINT_VALUES_ARG))
+            recsel_write_mode = REC_WRITER_VALUES;
+
+          if ((c == 'R') || (c == PRINT_IN_A_ROW_ARG))
+            recsel_write_mode = REC_WRITER_VALUES_ROW;
+
+          recsel_fex_str = xstrdup (optarg);
+
+          if (!rec_fex_check (recsel_fex_str, REC_FEX_SUBSCRIPTS))
+            recutl_fatal (_("invalid list of fields in -%c\n"), c);
+
+          /* Create the field expresion.  */
+          recsel_fex = rec_fex_new (recsel_fex_str,
+                                    REC_FEX_SUBSCRIPTS);
+          if (!recsel_fex)
+            recutl_fatal (_("internal error creating the field expression.\n"));
+
+          /* Check that all the functions called in the fex exist.
+             Otherwise raise an error.  */
           {
-            if (recsel_count)
+            size_t i = 0;
+            for (i = 0; i < rec_fex_size (recsel_fex); i++)
               {
-                recutl_fatal (_("cannot specify -[pPR] and also -c.\n"));
+                rec_fex_elem_t elem = rec_fex_get (recsel_fex, i);
+                const char *fname = rec_fex_elem_function_name (elem);
+
+                if (fname && !rec_aggregate_std_p (fname))
+                  recutl_fatal (_("invalid aggregate function '%s'\n"), fname);
               }
-
-            if ((c == 'P') || (c == PRINT_VALUES_ARG))
-              {
-                recsel_write_mode = REC_WRITER_VALUES;
-              }
-
-            if ((c == 'R') || (c == PRINT_IN_A_ROW_ARG))
-              {
-                recsel_write_mode = REC_WRITER_VALUES_ROW;
-              }
-
-            recsel_fex_str = xstrdup (optarg);
-
-            if (!rec_fex_check (recsel_fex_str, REC_FEX_SUBSCRIPTS))
-              {
-                recutl_fatal (_("invalid list of fields in -%c\n"), c);
-              }
-
-            /* Create the field expresion.  */
-            recsel_fex = rec_fex_new (recsel_fex_str,
-                                      REC_FEX_SUBSCRIPTS);
-            if (!recsel_fex)
-              {
-                recutl_fatal (_("internal error creating the field expression.\n"));
-              }
-
-            /* Check that all the functions called in the fex exist.
-               Otherwise raise an error.  */
-            
-            {
-              size_t i = 0;
-              for (i = 0; i < rec_fex_size (recsel_fex); i++)
-                {
-                  rec_fex_elem_t elem = rec_fex_get (recsel_fex, i);
-                  const char *fname = rec_fex_elem_function_name (elem);
-
-                  if (fname && !rec_aggregate_std_p (fname))
-                    {
-                      recutl_fatal (_("invalid aggregate function '%s'\n"), fname);
-                    }
-                }
-            }
-
-            break;
           }
+          break;
         case COLLAPSE_ARG:
         case 'C':
-          {
-            recsel_collapse = true;
-            break;
-          }
+          recsel_collapse = true;
+          break;
         case COUNT_ARG:
         case 'c':
-          {
-            if (recsel_fex_str)
-              {
-                recutl_fatal (_("cannot specify -c and also -p.\n"));
-                exit (EXIT_FAILURE);
-              }
+          if (recsel_fex_str)
+            {
+              recutl_fatal (_("cannot specify -c and also -p.\n"));
+              exit (EXIT_FAILURE);
+            }
 
-            recsel_count = true;
-            break;
-          }
+          recsel_count = true;
+          break;
         default:
-          {
-            exit (EXIT_FAILURE);
-          }
-
+          exit (EXIT_FAILURE);
         }
     }
 
   /* Global checks on the parameters.  */
-
   if (!recutl_type && recsel_join)
-    {
-      recutl_fatal (_("joins can only be used when a named record set is selected.\n"));
-    }
+    recutl_fatal (_("joins can only be used when a named record\
+ set is selected.\n"));
 }
 
 bool
@@ -401,22 +332,16 @@ recsel_process_data (rec_db_t db)
       rec_fex_t confidential_fields;
 
       if (recutl_type)
-        {
-          rset = rec_db_get_rset_by_type (db, recutl_type);
-        }
+        rset = rec_db_get_rset_by_type (db, recutl_type);
       else
-        {
-          rset = rec_db_get_rset (db, 0);
-        }
+        rset = rec_db_get_rset (db, 0);
 
       if (rset)
         {
           confidential_fields = rec_rset_confidential (rset);
           if (rec_fex_size (confidential_fields) > 0)
-            {
-              recsel_password = recutl_getpass (false);
-            }
-          
+            recsel_password = recutl_getpass (false);
+
           rec_fex_destroy (confidential_fields);
         }
     }
@@ -434,33 +359,23 @@ recsel_process_data (rec_db_t db)
   /* If the database contains more than one type of records and the
      user did'nt specify the recutl_type then ask the user to clarify
      the request.  */
-
   if (!recutl_type && (rec_db_size (db) > 1))
-    {
-      recutl_fatal (_("several record types found.  Please use -t to specify one.\n"));
-    }
+    recutl_fatal (_("several record types found.  Please use -t to specify one.\n"));
 
 
   /* Query the database using the criteria specified by the user in
      the command line.  */
-
   {
     int flags = 0;
 
     if (recutl_insensitive)
-      {
-        flags = flags | REC_F_ICASE;
-      }
+      flags = flags | REC_F_ICASE;
 
     if (recsel_descriptors)
-      {
-        flags = flags | REC_F_DESCRIPTOR;
-      }
+      flags = flags | REC_F_DESCRIPTOR;
 
     if (recsel_uniq)
-      {
-        flags = flags | REC_F_UNIQ;
-      }
+      flags = flags | REC_F_UNIQ;
 
     rset = rec_db_query (db,
                          recutl_type,
@@ -479,15 +394,11 @@ recsel_process_data (rec_db_t db)
   }
 
   if (recsel_count)
-    {
-      /* Write the number of matching records.  */
-      
-      fprintf (stdout, "%d\n", rec_rset_num_records (rset));
-    }
+    /* Write the number of matching records.  */
+    fprintf (stdout, "%d\n", rec_rset_num_records (rset));
   else
     {
       /* Write the resulting record set to the standard output.  */
-
       writer = rec_writer_new (stdout);
       rec_writer_set_collapse (writer, recsel_collapse);
       rec_writer_set_skip_comments (writer, true);
@@ -524,13 +435,8 @@ main (int argc, char *argv[])
 
   /* Process the data.  */
   if (!recsel_process_data (db))
-    {
-      res = 1;
-    }
+    res = 1;
 
   rec_db_destroy (db);
-
   return res;
 }
-
-/* End of recsel.c */

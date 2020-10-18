@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         mdb2rec.c
- *       Date:         Fri Aug 20 22:46:31 2010
- *
- *       GNU recutils - mdb to rec converter.
- *
- */
+/* mdb2rec.c - mdb to rec converter.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +36,8 @@
 static void parse_args (int argc, char **argv);
 static rec_db_t process_mdb (void);
 static rec_rset_t process_table (MdbCatalogEntry *entry);
-static char *get_field_name (MdbHandle *mdb, const char *table_name, const char *col_name);
+static char *get_field_name (MdbHandle *mdb,
+                             const char *table_name, const char *col_name);
 static void get_relationships (MdbHandle *mdb);
 
 /*
@@ -144,26 +137,18 @@ parse_args (int argc,
           COMMON_ARGS_CASES
         case SYSTEM_TABLES_ARG:
         case 's':
-          {
-            mdb2rec_include_system = true;
-            break;
-          }
+          mdb2rec_include_system = true;
+          break;
         case KEEP_EMPTY_FIELDS_ARG:
         case 'e':
-          {
-            mdb2rec_keep_empty_fields = true;
-            break;
-          }
+          mdb2rec_keep_empty_fields = true;
+          break;
         case LIST_TABLES_ARG:
         case 'l':
-          {
-            mdb2rec_list_tables = true;
-            break;
-          }
+          mdb2rec_list_tables = true;
+          break;
         default:
-          {
-            exit (EXIT_FAILURE);
-          }
+          exit (EXIT_FAILURE);
         }
     }
 
@@ -178,9 +163,7 @@ parse_args (int argc,
       mdb2rec_mdb_file = argv[optind++];
 
       if ((argc - optind) > 0)
-        {
-          mdb2rec_mdb_table = argv[optind++];
-        }
+        mdb2rec_mdb_table = argv[optind++];
     }
 }
 
@@ -195,22 +178,18 @@ get_relationships (MdbHandle *mdb)
                                   "MsysRelationships",
                                   MDB_TABLE);
   if ((!table) || (table->num_rows == 0))
-    {
-      return;
-    }
+    return;
 
   mdb_read_columns (table);
   for (i = 0; i < 4; i++)
-    {
-      bound[i] = xmalloc (MDB_BIND_SIZE);
-    }
+    bound[i] = xmalloc (MDB_BIND_SIZE);
 
   mdb_bind_column_by_name (table, "szColumn", bound[0], NULL);
   mdb_bind_column_by_name (table, "szObject", bound[1], NULL);
   mdb_bind_column_by_name (table, "szReferencedColumn", bound[2], NULL);
   mdb_bind_column_by_name (table, "szReferencedObject", bound[3], NULL);
   mdb_rewind_table (table);
-  
+
   num_relationships = table->num_rows;
   relationships = xmalloc (sizeof (struct relationship_s) * num_relationships);
 
@@ -242,24 +221,20 @@ get_field_name (MdbHandle *mdb,
   referenced_column = NULL;
   for (i = 0; i < num_relationships; i++)
     {
-      if ((strcmp (relationships[i].table, table_name) == 0) 
+      if ((strcmp (relationships[i].table, table_name) == 0)
           && (strcmp (relationships[i].column, col_name) == 0))
         {
           referenced_table =
             rec_field_name_normalise (relationships[i].referenced_table);
           if (!referenced_table)
-            {
-              recutl_fatal (_("failed to normalise record type name %s\n"),
-                            relationships[i].referenced_table);
-            }
+            recutl_fatal (_("failed to normalise record type name %s\n"),
+                          relationships[i].referenced_table);
 
-          referenced_column = 
+          referenced_column =
             rec_field_name_normalise (relationships[i].referenced_column);
           if (!referenced_column)
-            {
-              recutl_fatal (_("failed to normalise field name %s\n"),
-                            relationships[i].referenced_column);
-            }
+            recutl_fatal (_("failed to normalise field name %s\n"),
+                          relationships[i].referenced_column);
 
           break;
         }
@@ -267,10 +242,8 @@ get_field_name (MdbHandle *mdb,
 
   field_name = rec_field_name_normalise (col_name);
   if (!field_name)
-    {
-      recutl_fatal (_("failed to normalise field name %s\n"),
-                    table_name);
-    }
+    recutl_fatal (_("failed to normalise field name %s\n"),
+                  table_name);
 
   if (referenced_table && referenced_column)
     {
@@ -312,10 +285,8 @@ process_table (MdbCatalogEntry *entry)
   /* Create the record descriptor and add the %rec: entry.  */
   field_name = rec_field_name_normalise (table_name);
   if (!field_name)
-    {
-      recutl_fatal (_("failed to normalise record type name %s\n"),
-                    table_name);
-    }
+    recutl_fatal (_("failed to normalise record type name %s\n"),
+                  table_name);
 
   record = rec_record_new ();
   field = rec_field_new ("%rec", field_name);
@@ -333,76 +304,59 @@ process_table (MdbCatalogEntry *entry)
       type_value[0] = 0;
       normalised = rec_field_name_normalise (column_name);
       if (!normalised)
-        {
-          recutl_fatal (_("failed to normalise the field name %s\n"),
-                        column_name);
-        }
+        recutl_fatal (_("failed to normalise the field name %s\n"),
+                      column_name);
 
       /* Emit a field type specification.  */
       switch (col->col_type)
         {
         case MDB_BOOL:
-          {
-            snprintf (type_value, TYPE_VALUE_SIZE,
-                      "%s bool", normalised);
-            break;
-          }
+          snprintf (type_value, TYPE_VALUE_SIZE,
+                    "%s bool", normalised);
+          break;
         case MDB_BYTE:
-          {
-            snprintf (type_value, TYPE_VALUE_SIZE,
-                      "%s range 256", normalised);
-            break;
-          }
+          snprintf (type_value, TYPE_VALUE_SIZE,
+                    "%s range 256", normalised);
+          break;
         case MDB_INT:
         case MDB_LONGINT:
         case MDB_NUMERIC:
-          {
-            snprintf (type_value, TYPE_VALUE_SIZE,
-                      "%s int", normalised);
-            break;
-          }
+          snprintf (type_value, TYPE_VALUE_SIZE,
+                    "%s int", normalised);
+          break;
         case MDB_MONEY:
         case MDB_FLOAT:
         case MDB_DOUBLE:
-          {
-            snprintf (type_value, TYPE_VALUE_SIZE,
-                      "%s real", normalised);
-            break;
-          }
+          snprintf (type_value, TYPE_VALUE_SIZE,
+                    "%s real", normalised);
+          break;
         case MDB_DATETIME:
-          {
-            snprintf (type_value, TYPE_VALUE_SIZE,
-                      "%s date", normalised);
-            break;
-          }
+          snprintf (type_value, TYPE_VALUE_SIZE,
+                    "%s date", normalised);
+          break;
         case MDB_TEXT:
-          {
-            if (col->col_size > 0)
-              {
-                snprintf (type_value, TYPE_VALUE_SIZE,
-                          "%s size %d", normalised, col->col_size);
-              }
-            break;
-          }
+          if (col->col_size > 0)
+            snprintf (type_value, TYPE_VALUE_SIZE,
+                      "%s size %d", normalised, col->col_size);
+          break;
         case MDB_REPID:
         case MDB_MEMO:
         case MDB_OLE:
         default:
-          {
-            break;
-          }
+          break;
         }
 
       if (type_value[0] != 0)
         {
           /* Insert a type field for this column.  */
           field = rec_field_new ("%type", type_value);
-          rec_mset_append (rec_record_mset (record), MSET_FIELD, (void *) field, MSET_ANY);
+          rec_mset_append (rec_record_mset (record),
+                           MSET_FIELD, (void *) field, MSET_ANY);
         }
     }
 
   rec_rset_set_descriptor (rset, record);
-  
+
   /* Add the records for this table.  */
   mdb_rewind_table (table);
 
@@ -425,9 +379,7 @@ process_table (MdbCatalogEntry *entry)
           col = g_ptr_array_index (table->columns, i);
 
           if (col->col_type == MDB_OLE)
-            {
-              continue;
-            }
+            continue;
 
           /* Compute the value of the field.  */
           field_value = xmalloc (bound_lens[i] + 1);
@@ -444,14 +396,16 @@ process_table (MdbCatalogEntry *entry)
                   recutl_fatal (_("invalid field name %s.\n"), column_name);
                 }
 
-              rec_mset_append (rec_record_mset (record), MSET_FIELD, (void *) field, MSET_ANY);
+              rec_mset_append (rec_record_mset (record), MSET_FIELD,
+                               (void *) field, MSET_ANY);
             }
 
           free (field_value);
         }
 
       rec_record_set_container (record, rset);
-      rec_mset_append (rec_rset_mset (rset), MSET_RECORD, (void *) record, MSET_ANY);
+      rec_mset_append (rec_rset_mset (rset), MSET_RECORD,
+                       (void *) record, MSET_ANY);
     }
 
   mdb_free_tabledef (table);
@@ -479,16 +433,12 @@ process_mdb (void)
 
   mdb = mdb_open (mdb2rec_mdb_file, MDB_NOFLAGS);
   if (!mdb)
-    {
-      recutl_fatal (_("could not open file %s\n"),
-                    mdb2rec_mdb_file);
-    }
+    recutl_fatal (_("could not open file %s\n"),
+                  mdb2rec_mdb_file);
 
   /* Read the catalog.  */
   if (!mdb_read_catalog (mdb, MDB_TABLE))
-    {
-      recutl_fatal (_("file does not appear to be an Access database\n"));
-    }
+    recutl_fatal (_("file does not appear to be an Access database\n"));
 
   /* Read relationships from the database.  Relationships in mdb files
      are stored in the MSysRelationships table.  */
@@ -506,15 +456,11 @@ process_mdb (void)
           && (!mdb2rec_mdb_table || (strcmp (mdb2rec_mdb_table, table_name) == 0)))
         {
           if (mdb2rec_list_tables)
-            {
-              fprintf (stdout, "%s\n", table_name);
-            }
+            fprintf (stdout, "%s\n", table_name);
           else
-            {
-              rec_db_insert_rset (db,
-                                  process_table (entry),
-                                  rec_db_size (db));
-            }
+            rec_db_insert_rset (db,
+                                process_table (entry),
+                                rec_db_size (db));
         }
     }
 
@@ -537,18 +483,14 @@ main (int argc, char *argv[])
     {
       writer = rec_writer_new (stdout);
       rec_write_db (writer, db);
-      
+
       rec_writer_destroy (writer);
       rec_db_destroy (db);
 
       ret = EXIT_SUCCESS;
     }
   else
-    {
-      ret = EXIT_FAILURE;
-    }
+    ret = EXIT_FAILURE;
 
   return ret;
 }
-
-/* End of mdb2rec.c */

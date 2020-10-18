@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-record.c
- *       Date:         Thu Mar  5 17:11:41 2009
- *
- *       GNU recutils - Records
- *
- */
+/* rec-record.c - Records.  */
 
-/* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
- * 2018, 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2009-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,10 +22,6 @@
 
 #include <rec.h>
 #include <rec-utils.h>
-
-/*
- * Record data structures.
- */
 
 struct rec_record_s
 {
@@ -60,19 +48,62 @@ struct rec_record_s
   rec_mset_t mset;
 };
 
-/* Static functions implemented below.  */
+static void
+rec_record_init (rec_record_t record)
+{
+  /* Initialize the record structure so it can be safely passed to
+     rec_record_destroy even if its contents are not completely
+     initialized with real values.  */
+  memset (record, 0 /* NULL */, sizeof (struct rec_record_s));
+}
 
-static void rec_record_init (rec_record_t record);
-static void rec_record_field_disp_fn (void *data);
-static bool rec_record_field_equal_fn (void *data1, void *data2);
-static void *rec_record_field_dup_fn (void *data);
-static void rec_record_comment_disp_fn (void *data);
-static bool rec_record_comment_equal_fn (void *data1, void *data2);
-static void *rec_record_comment_dup_fn (void *data);
+static void
+rec_record_field_disp_fn (void *data)
+{
+  rec_field_destroy ((rec_field_t) data);
+}
 
-/*
- * Public functions.
- */
+static bool
+rec_record_field_equal_fn (void *data1,
+                           void *data2)
+{
+  return (data1 == data2);
+  /*  return rec_field_equal_p ((rec_field_t) data1,
+      (rec_field_t) data2);*/
+}
+
+static void *
+rec_record_field_dup_fn (void *data)
+{
+  rec_field_t copy;
+
+  copy = rec_field_dup ((rec_field_t) data);
+  return (void *) copy;
+}
+
+static void
+rec_record_comment_disp_fn (void *data)
+{
+  rec_comment_destroy ((rec_comment_t) data);
+}
+
+static bool
+rec_record_comment_equal_fn (void *data1,
+                             void *data2)
+{
+  return (data1 == data2);
+  /*  return rec_comment_equal_p ((rec_comment_t) data1,
+      (rec_comment_t) data2);*/
+}
+
+static void *
+rec_record_comment_dup_fn (void *data)
+{
+  rec_comment_t copy;
+
+  copy = rec_comment_dup ((rec_comment_t) data);
+  return (void *) copy;
+}
 
 rec_record_t
 rec_record_new (void)
@@ -124,7 +155,6 @@ rec_record_new (void)
       else
         {
           /* Out of memory.  */
-
           rec_record_destroy (record);
           record = NULL;
         }
@@ -244,11 +274,10 @@ rec_record_subset_p (rec_record_t record1,
         }
 
       rec_mset_iterator_free (&iter2);
-      
+
     }
 
   rec_mset_iterator_free (&iter1);
-  
   return result;
 }
 
@@ -256,8 +285,8 @@ bool
 rec_record_equal_p (rec_record_t record1,
                     rec_record_t record2)
 {
-  return ((rec_record_subset_p (record1, record2)) &&
-          (rec_record_subset_p (record2, record1)));
+  return ((rec_record_subset_p (record1, record2))
+          && (rec_record_subset_p (record2, record1)));
 }
 
 rec_mset_t
@@ -293,18 +322,15 @@ rec_record_get_field_index (rec_record_t record,
   rec_field_t list_field;
 
   iter = rec_mset_iterator (record->mset);
-  while (rec_mset_iterator_next (&iter, MSET_FIELD, (const void **) &list_field, NULL))
+  while (rec_mset_iterator_next (&iter, MSET_FIELD,
+                                 (const void **) &list_field, NULL))
     {
       if (field == list_field)
-        {
-          break;
-        }
-
+        break;
       res++;
     }
 
   rec_mset_iterator_free (&iter);
-
   return res;
 }
 
@@ -324,12 +350,11 @@ rec_record_get_num_fields_by_name (rec_record_t record,
   int num_fields = 0;
 
   iter = rec_mset_iterator (record->mset);
-  while (rec_mset_iterator_next (&iter, MSET_FIELD, (const void **) &field, NULL))
+  while (rec_mset_iterator_next (&iter, MSET_FIELD,
+                                 (const void **) &field, NULL))
     {
       if (rec_field_name_equal_p (rec_field_name (field), field_name))
-        {
-          num_fields++;
-        }
+        num_fields++;
     }
   rec_mset_iterator_free (&iter);
 
@@ -346,7 +371,7 @@ rec_record_get_field_by_name (rec_record_t record,
   rec_field_t result = NULL;
   rec_mset_iterator_t iter;
 
-  
+
   iter = rec_mset_iterator (record->mset);
   while (rec_mset_iterator_next (&iter, MSET_FIELD, (const void **) &field, NULL))
     {
@@ -382,9 +407,7 @@ rec_record_remove_field_by_name (rec_record_t record,
       if (rec_field_name_equal_p (rec_field_name (field), field_name))
         {
           if ((n == -1) || (n == num_fields))
-            {
-              rec_mset_remove_elem (record->mset, elem);
-            }
+            rec_mset_remove_elem (record->mset, elem);
 
           num_fields++;
         }
@@ -404,14 +427,10 @@ rec_record_get_field_index_by_name (rec_record_t record,
   while (rec_mset_iterator_next (&iter, MSET_FIELD, (const void **) &list_field, NULL))
     {
       if (field == list_field)
-        {
-          break;
-        }
+        break;
 
       if (rec_field_equal_p (field, list_field))
-        {
-          res++;
-        }
+        res++;
     }
 
   rec_mset_iterator_free (&iter);
@@ -458,9 +477,7 @@ rec_record_to_comment (rec_record_t record)
 
   /* Remove a trailing newline.  */
   if (comment_str[comment_str_size - 1] == '\n')
-    {
-      comment_str[comment_str_size - 1] = '\0';
-    }
+    comment_str[comment_str_size - 1] = '\0';
 
   res = rec_comment_new (comment_str);
   free (comment_str);
@@ -471,18 +488,10 @@ rec_record_to_comment (rec_record_t record)
 char *
 rec_record_source (rec_record_t record)
 {
-  char *res;
-
   if (record->source)
-    {
-      res = record->source;
-    }
+    return record->source;
   else
-    {
-      res = "";
-    }
-
-  return res;
+    return "";
 }
 
 void
@@ -510,15 +519,9 @@ rec_record_location_str (rec_record_t record)
   char *res;
 
   if (record->location_str)
-    {
-      res = record->location_str;
-    }
+    return record->location_str;
   else
-    {
-      res = "";
-    }
-
-  return res;
+    return "";
 }
 
 void
@@ -548,15 +551,9 @@ rec_record_char_location_str (rec_record_t record)
   char *res;
 
   if (record->char_location_str)
-    {
-      res = record->char_location_str;
-    }
+    return record->char_location_str;
   else
-    {
-      res = "";
-    }
-
-  return res;
+    return "";
 }
 
 void
@@ -570,7 +567,7 @@ rec_record_set_char_location (rec_record_t record,
       free (record->char_location_str);
       record->char_location_str = NULL;
     }
-  
+
   asprintf (&(record->char_location_str), "%zu", record->char_location);
 }
 
@@ -591,19 +588,13 @@ rec_record_contains_value (rec_record_t record,
       field_value = rec_field_value (field);
 
       if (case_insensitive)
-        {
-          occur = strcasestr (field_value, str);
-        }
+        occur = strcasestr (field_value, str);
       else
-        {
-          occur = strstr (field_value, str);
-        }
+        occur = strstr (field_value, str);
 
       res = (occur != NULL);
       if (res)
-        {
-          break;
-        }
+        break;
     }
 
   rec_mset_iterator_free (&iter);
@@ -659,14 +650,12 @@ rec_record_uniq (rec_record_t record)
 
   /* Create a map of the fields to remove and initialize all the
      entries to false.  */
-
   num_fields = rec_record_num_fields (record);
   to_remove = malloc (sizeof(bool) * num_fields);
   memset (to_remove, false, num_fields);
 
   /* Iterate on the fields of the record an mark the fields that will
      be removed in the removal mask.  */
-
   i = 0;
   iter1 = rec_mset_iterator (record->mset);
   while (rec_mset_iterator_next (&iter1, MSET_FIELD, (const void **) &field1, NULL))
@@ -675,18 +664,19 @@ rec_record_uniq (rec_record_t record)
         {
           /* Mark any other occurrence of this field having the same
              value for removal. */
-
           j = 0;
           iter2 = rec_mset_iterator (record->mset);
           while (rec_mset_iterator_next (&iter2, MSET_FIELD, (const void **) &field2, NULL))
             {
               if ((j != i)
-                  && rec_field_name_equal_p (rec_field_name (field1), rec_field_name (field2))
-                  && rec_field_name_equal_p (rec_field_value (field1), rec_field_value (field2)))
+                  && rec_field_name_equal_p (rec_field_name (field1),
+                                             rec_field_name (field2))
+                  && rec_field_name_equal_p (rec_field_value (field1),
+                                             rec_field_value (field2)))
                 {
                   to_remove[j] = true;
                 }
-              
+
               j++;
             }
           rec_mset_iterator_free (&iter2);
@@ -696,23 +686,18 @@ rec_record_uniq (rec_record_t record)
     }
   rec_mset_iterator_free (&iter1);
 
-
   /* Remove the fields marked for removal.  */
-
   i = 0;
   iter1 = rec_mset_iterator (record->mset);
   while (rec_mset_iterator_next (&iter1, MSET_FIELD, (const void **) &field1, &elem1))
     {
       if (to_remove[i])
-        {
-          rec_mset_remove_elem (record->mset, elem1);
-        }
+        rec_mset_remove_elem (record->mset, elem1);
 
       i++;
     }
 
   /* Cleanup.  */
-
   free (to_remove);
 }
 
@@ -730,10 +715,8 @@ rec_record_append (rec_record_t dest_record,
                             MSET_FIELD,
                             (void *) rec_field_dup (field),
                             MSET_FIELD))
-        {
-          /* Out of memory.  Just return.  */
-          return;
-        }
+        /* Out of memory.  Just return.  */
+        return;
     }
   rec_mset_iterator_free (&iter);
 }
@@ -746,9 +729,7 @@ rec_record_reset_marks (rec_record_t record)
 
   iter = rec_mset_iterator (record->mset);
   while (rec_mset_iterator_next (&iter, MSET_FIELD, (const void **) &field, NULL))
-    {
-      rec_field_set_mark (field, 0);
-    }
+    rec_field_set_mark (field, 0);
   rec_mset_iterator_free (&iter);
 }
 
@@ -781,67 +762,3 @@ rec_record_field_mark (rec_record_t record,
 {
   return rec_field_mark (field);
 }
-
-/*
- * Private functions
- */
-
-static void
-rec_record_init (rec_record_t record)
-{
-  /* Initialize the record structure so it can be safely passed to
-     rec_record_destroy even if its contents are not completely
-     initialized with real values.  */
-  
-  memset (record, 0 /* NULL */, sizeof (struct rec_record_s));
-}
-
-static void
-rec_record_field_disp_fn (void *data)
-{
-  rec_field_destroy ((rec_field_t) data);
-}
-
-static bool
-rec_record_field_equal_fn (void *data1,
-                           void *data2)
-{
-  return (data1 == data2);
-  /*  return rec_field_equal_p ((rec_field_t) data1,
-      (rec_field_t) data2);*/
-}
-
-static void *
-rec_record_field_dup_fn (void *data)
-{
-  rec_field_t copy;
-
-  copy = rec_field_dup ((rec_field_t) data);
-  return (void *) copy;
-}
-
-static void
-rec_record_comment_disp_fn (void *data)
-{
-  rec_comment_destroy ((rec_comment_t) data);
-}
-
-static bool
-rec_record_comment_equal_fn (void *data1,
-                             void *data2)
-{
-  return (data1 == data2);
-/*  return rec_comment_equal_p ((rec_comment_t) data1,
-(rec_comment_t) data2);*/
-}
-
-static void *
-rec_record_comment_dup_fn (void *data)
-{
-  rec_comment_t copy;
-  
-  copy = rec_comment_dup ((rec_comment_t) data);
-  return (void *) copy;
-}
-
-/* End of rec-record.c */

@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         csv2rec.c
- *       Date:         Fri Aug 20 16:35:25 2010
- *
- *       GNU recutils - csv to rec converter.
- *
- */
+/* csv2rec.c - csv to rec converter.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -144,26 +136,18 @@ parse_args (int argc,
           COMMON_ARGS_CASES
         case RECORD_TYPE_ARG:
         case 't':
-          {
-            csv2rec_record_type = xstrdup (optarg);
-            break;
-          }
+          csv2rec_record_type = xstrdup (optarg);
+          break;
         case STRICT_ARG:
         case 's':
-          {
-            csv2rec_strict = true;
-            break;
-          }
+          csv2rec_strict = true;
+          break;
         case OMIT_EMPTY_ARG:
         case 'e':
-          {
-            csv2rec_omit_empty = true;
-            break;
-          }
+          csv2rec_omit_empty = true;
+          break;
         default:
-          {
-            exit (EXIT_FAILURE);
-          }
+          exit (EXIT_FAILURE);
         }
     }
 
@@ -219,18 +203,14 @@ field_cb (void *s, size_t len, void *data)
       for (i = 0; i < strlen (str); i++)
         {
           if ((str[i] == ' ') || (str[i] == '\t'))
-            {
-              str[i] = '_';
-            }
+            str[i] = '_';
         }
 
       /* Verify that it is a valid field name.  */
       field_name = str;
       if (!rec_field_name_p (field_name))
-        {
-          recutl_fatal (_("invalid field name '%s' in header\n"),
-                        str);
-        }
+        recutl_fatal (_("invalid field name '%s' in header\n"),
+                      str);
       ctx->field_names[ctx->num_field_names++] = str;
     }
   else
@@ -247,7 +227,7 @@ field_cb (void *s, size_t len, void *data)
           if (!ctx->record)
             recutl_out_of_memory ();
         }
-      
+
       if (!csv2rec_omit_empty || (strlen(str) > 0))
         {
           if (ctx->num_fields > ctx->num_field_names)
@@ -297,10 +277,8 @@ record_cb (int c, void *data)
 
           /* Add a type, if needed.  */
           if (csv2rec_record_type)
-            {
-              rec_rset_set_type (ctx->rset, csv2rec_record_type);
-            }
-          
+            rec_rset_set_type (ctx->rset, csv2rec_record_type);
+
           /* Add it to the database.  */
           if (!ctx->db)
             {
@@ -310,11 +288,13 @@ record_cb (int c, void *data)
             }
           rec_db_insert_rset (ctx->db, ctx->rset, rec_db_size (ctx->db));
         }
-      
+
       /* Add the current record to the record set.  */
-      rec_mset_append (rec_rset_mset (ctx->rset), MSET_RECORD, (void *) ctx->record, MSET_ANY);
+      rec_mset_append (rec_rset_mset (ctx->rset),
+                       MSET_RECORD,
+                       (void *) ctx->record, MSET_ANY);
       ctx->record = NULL;
-      
+
       /* Reset the field counter.  */
       ctx->num_fields = 0;
     }
@@ -355,9 +335,7 @@ process_csv (void)
 
   /* Initialize the csv library.  */
   if (csv_init (&p, options) != 0)
-    {
-      recutl_fatal (_("failed to initialize csv parser\n"));
-    }
+    recutl_fatal (_("failed to initialize csv parser\n"));
 
   /* Set some properties of the parser.  */
   if (csv2rec_strict)
@@ -378,7 +356,7 @@ process_csv (void)
                       csv_strerror (csv_error (&p)));
 
     }
-  
+
   return ctx.db;
 }
 
@@ -404,11 +382,7 @@ main (int argc, char *argv[])
       rec_db_destroy (db);
     }
   else
-    {
-      ret = EXIT_FAILURE;
-    }
+    ret = EXIT_FAILURE;
 
   return ret;
 }
-
-/* End of csv2rec.c */

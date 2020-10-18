@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-crypt.c
- *       Date:         Fri Aug 26 19:50:51 2011
- *
- *       GNU recutils - Encryption routines
- *
- */
+/* rec-crypt.c - encryption routines.  */
 
-/* Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
- * 2020 Jose E. Marchesi */
+/* Copyright (C) 2011-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,11 +60,11 @@ rec_encrypt (char   *in,
   /* Append four bytes to the input buffer, containing the CRC of its
      contents.  This will be used as a control token to determine
      whether the correct key is used in decryption.
-  
+
      We store the integer always in little-endian. */
-  
+
   crc = crc32 (in, in_size);
-  
+
 #if defined WORDS_BIGENDIAN
   crc = rec_endian_swap (crc);
 #endif
@@ -98,7 +90,7 @@ rec_encrypt (char   *in,
 
       for (i = 0; i < padding; i++)
         real_in[real_in_size - i - 1] = '\0';
-    }  
+    }
 
   /* Create the handler.  */
   if (gcry_cipher_open (&handler,
@@ -229,7 +221,7 @@ rec_decrypt (char   *in,
   if (strlen(*out) > 4)
     {
       uint32_t crc = 0;
-      
+
       memcpy (&crc, *out + strlen(*out) - 4, 4);
 #if defined WORDS_BIGENDIAN
       crc = rec_endian_swap (crc);
@@ -318,7 +310,7 @@ rec_encrypt_field (rec_field_t field,
                     &field_value_encrypted,
                     &out_size))
     return false;
-  
+
   /* Encode the encrypted value into base64.  */
 
   base64_size = base64_encode_alloc (field_value_encrypted,
@@ -342,10 +334,10 @@ rec_encrypt_field (rec_field_t field,
       + strlen (REC_ENCRYPTED_PREFIX)] = '\0';
   free (field_value_base64);
   field_value_base64 = aux;
-  
+
   /* Replace the value of the field.  */
   rec_field_set_value (field, field_value_base64);
-  
+
   /* Free resources.  */
   free (field_value);
   free (field_value_encrypted);
@@ -384,7 +376,7 @@ rec_decrypt_field (rec_field_t field,
                      strlen(field_value),
                      base64_decoded,
                      &base64_decoded_size);
-      
+
       /* Decrypt.  */
 
       if (rec_decrypt (base64_decoded,
@@ -435,5 +427,3 @@ rec_decrypt_record (rec_rset_t rset,
 
   return res;
 }
-
-/* End of rec-crypt.c */

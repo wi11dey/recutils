@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-utils.h
- *       Date:         Fri Apr  9 19:42:52 2010
- *
- *       GNU recutils - Miscellanea utilities
- *
- */
+/* rec-utils.h - Miscellanea utilities.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,6 +79,4 @@ int rec_timespec_subtract (struct timespec *result,
 
 uint32_t rec_endian_swap (uint32_t number);
 
-#endif /* rec-utils.h */
-
-/* End of rec-utils.h.  */
+#endif /* ! REC_UTILS_H */

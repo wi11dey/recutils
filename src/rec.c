@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec.c
- *       Date:         Sun Oct 24 19:47:16 2010
- *
- *       GNU recutils - Initialization and finalization routines.
- *
- */
+/* rec.c - initialization and finalization routines.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,5 +42,3 @@ rec_fini (void)
   curl_global_cleanup ();
 #endif
 }
-
-/* End of rec.c */

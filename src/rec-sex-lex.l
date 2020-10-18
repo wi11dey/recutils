@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-sex.l
- *       Date:         Sat Jan  9 16:35:18 2010
- *
- *       GNU recutils - Selection Expressions lexer
- *
- */
+/* rec-sex-lex.l - Selection Expressions lexer.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,9 +44,7 @@
    {                                                                    \
      int ci;                                                            \
      if ((ci = rec_sex_parser_getc ((rec_sex_parser_t) yyextra)) == -1)     \
-       {                                                                \
-         result = YY_NULL;                                              \
-       }                                                                \
+       result = YY_NULL;                                                \
      else                                                               \
        {                                                                \
          buf[0] = (char) ci;                                            \
@@ -87,7 +77,7 @@ STRING             '([^']|\\(.|\n))*'|\"([^"]|\\(.|\n))*\"
    * Create a real node.
    */
   double real_value;
-  
+
   yylval->node = rec_sex_ast_node_new ();
   rec_atod (yytext, &real_value);
   rec_sex_ast_node_set_real (yylval->node, real_value);
@@ -105,7 +95,7 @@ STRING             '([^']|\\(.|\n))*'|\"([^"]|\\(.|\n))*\"
   rec_atoi (yytext, &integer_value);
   rec_sex_ast_node_set_int (yylval->node, integer_value);
 
-  return REC_SEX_TOK_INT;    
+  return REC_SEX_TOK_INT;
 }
 
 "+"      { return REC_SEX_TOK_ADD; }
@@ -161,7 +151,7 @@ STRING             '([^']|\\(.|\n))*'|\"([^"]|\\(.|\n))*\"
   /*
    * Create a string node.
    */
-  
+
   /* Strip the quoting characters */
   yytext[strlen(yytext) - 1] = 0;
 
@@ -184,9 +174,7 @@ rec_sex_lex_extract_name (char *str)
 
   p = str;
   while ((*p != '[') && (*p != '.') && (*p != 0))
-    {
-      p++;
-    }
+    p++;
 
   size = p - str;
   res = malloc (size + 1);
@@ -203,18 +191,14 @@ rec_sex_lex_extract_subname (char *str)
 
   /* If there is not a subname denoted in STR then this function
      returns NULL.  */
-  
+
   p = str;
   while ((*p != '.') && (*p != '\0'))
-    {
-      p++;
-    }
+    p++;
 
   if (*p == '\0')
-    {
-      /* There is not a second name.  */
-      return NULL;
-    }
+    /* There is not a second name.  */
+    return NULL;
 
   p++;  /* Skip the dot separator.  */
 
@@ -231,19 +215,15 @@ rec_sex_lex_extract_index (char *str,
   int aux_size;
 
   /* Note that this function assumes syntax correctness in STR if a
-     '[' is found.  */  
+     '[' is found.  */
 
   aux_size = 0;
   p = str;
   while ((*p != 0) && (*p != '['))
-    {
-      p++;
-    }
+    p++;
 
   if (*p == 0)
-    {
-      res = false;
-    }
+    res = false;
   else
     {
       p++; /* Pass the [.  */
@@ -255,14 +235,10 @@ rec_sex_lex_extract_index (char *str,
       aux[aux_size] = 0;
 
       if (!rec_atoi (aux, num))
-        {
-          res = false;
-        }
+        res = false;
 
       res = true;
     }
 
   return res;
 }
-
-/* End of rec-sex.l */

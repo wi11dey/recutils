@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-sex-parser.h
- *       Date:         Tue Jan 12 17:59:45 2010
- *
- *       GNU recutils - Sexy parser
- *
- */
+/* rec-sex-parser.h - Sexy parser.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,10 +28,6 @@
 
 typedef struct rec_sex_parser_s *rec_sex_parser_t;
 
-/*
- * Public functions
- */
-
 rec_sex_parser_t rec_sex_parser_new (void);
 void rec_sex_parser_destroy (rec_sex_parser_t parser);
 
@@ -56,6 +44,4 @@ void *rec_sex_parser_scanner (rec_sex_parser_t parser);
 
 void rec_sex_parser_print_ast (rec_sex_parser_t parser);
 
-#endif /* rec-sex-parser.h */
-
-/* End of rec-sex-parser.h */
+#endif /* ! REC_SEX_PARSER_H */

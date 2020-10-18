@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-comment.c
- *       Date:         Wed Apr  7 17:22:45 2010
- *
- *       GNU recutils - Comments.
- *
- */
+/* rec-comment.c - handling of comments.  */
 
-/* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
- * 2018, 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2009-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,10 +22,6 @@
 #include <string.h>
 
 #include <rec.h>
-
-/*
- * Public functions.
- */
 
 rec_comment_t
 rec_comment_new (char *text)
@@ -76,5 +64,3 @@ rec_comment_equal_p (rec_comment_t comment1,
 {
   return (strcmp (comment1, comment2) == 0);
 }
-
-/* End of rec-comment.c */

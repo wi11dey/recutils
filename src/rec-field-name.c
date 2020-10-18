@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-field-name.c
- *       Date:         Fri Dec 25 17:27:05 2009
- *
- *       GNU recutils - Field names.
- *
- */
+/* rec-field-name.c - Field names.  */
 
-/* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
- * 2018, 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2009-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,12 +31,12 @@
 /* The following global variable contains field names which are either
    standard, such as the special field names, or often used in the
    library.
-   
+
    Note that the array is indexed using the rec_std_field_e enumerated
    values defined in rec.h, so the order is important.  */
 
 static const char *fnames[] =
-  { 
+  {
     "%auto",
     "%confidential",
     "%key",
@@ -83,21 +75,18 @@ rec_field_name_normalise (const char *str)
     {
       memcpy (normalised_name, str, strlen (str));
       normalised_name[strlen(str)] = '\0';
-      
+
       for (i = 0; i < strlen (normalised_name); i++)
         {
           if (!((isalnum (normalised_name[i]))
                 || (normalised_name[i] == '_')
                 || (normalised_name[i] == '-')
                 || (normalised_name[i] == '%')))
-            {
-              normalised_name[i] = '_';
-            }
+            normalised_name[i] = '_';
         }
     }
 
   /* Check that the normalisation produced a proper field name.  */
-
   if (normalised_name)
     {
       if (!rec_field_name_p (normalised_name))
@@ -117,5 +106,3 @@ rec_field_name_equal_p (const char *name1,
   /* TODO: 'foo' and 'foo:' denote the same field name.  */
   return (strcmp (name1, name2) == 0);
 }
-
-/* End of rec-field-name.c */

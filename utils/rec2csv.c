@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec2csv.c
- *       Date:         Mon Jan 31 22:12:29 2011
- *
- *       GNU recutils - rec to csv converter.
- *
- */
+/* rec2csv.c - rec to csv converter.  */
 
-/* Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
- * 2020 Jose E. Marchesi */
+/* Copyright (C) 2011-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,16 +28,6 @@
 #include <csv.h>
 #include <rec.h>
 #include <recutl.h>
-
-/* Forward declarations.  */
-static void rec2csv_parse_args (int argc, char **argv);
-static bool rec2csv_process_data (rec_db_t db);
-static rec_fex_t rec2csv_determine_fields (rec_rset_t rset);
-static void rec2csv_generate_csv (rec_rset_t rset, rec_fex_t fex);
-
-/*
- * Types
- */
 
 /*
  * Global variables
@@ -75,7 +57,6 @@ static const struct option GNU_longOptions[] =
     {"sort", required_argument, NULL, SORT_ARG},
     {NULL, 0, NULL, 0}
   };
-
 
 /*
  * Functions.
@@ -128,43 +109,29 @@ rec2csv_parse_args (int argc,
           COMMON_ARGS_CASES
         case DELIM_ARG:
         case 'd':
-          {
-            rec2csv_delim = optarg[0];
-            break;
-          }
+          rec2csv_delim = optarg[0];
+          break;
         case RECORD_TYPE_ARG:
         case 't':
-          {
-            rec2csv_record_type = xstrdup (optarg);
-            break;
-          }
+          rec2csv_record_type = xstrdup (optarg);
+          break;
         case SORT_ARG:
         case 'S':
-          {
-            if (rec2csv_sort_by_fields)
-              {
-                recutl_fatal (_("only one list of fields can be specified as a sorting criteria.\n"));
-              }
+          if (rec2csv_sort_by_fields)
+            recutl_fatal (_("only one list of fields can be specified\
+ as a sorting criteria.\n"));
 
-            /* Parse the field name.  */
+          /* Parse the field name.  */
+          if (!rec_fex_check (optarg, REC_FEX_CSV))
+            recutl_fatal (_("invalid field name list in -S.\n"));
 
-            if (!rec_fex_check (optarg, REC_FEX_CSV))
-              {
-                recutl_fatal (_("invalid field name list in -S.\n"));
-              }
+          rec2csv_sort_by_fields = rec_fex_new (optarg, REC_FEX_CSV);
+          if (!rec2csv_sort_by_fields)
+            recutl_fatal (_("internal error creating fex.\n"));
 
-            rec2csv_sort_by_fields = rec_fex_new (optarg, REC_FEX_CSV);
-            if (!rec2csv_sort_by_fields)
-              {
-                recutl_fatal (_("internal error creating fex.\n"));
-              }
-
-            break;
-          }
+          break;
         default:
-          {
-            exit (EXIT_FAILURE);
-          }
+          exit (EXIT_FAILURE);
         }
     }
 }
@@ -185,20 +152,15 @@ rec2csv_generate_csv (rec_rset_t rset,
   for (i = 0; i < rec_fex_size (fex); i++)
     {
       if (i != 0)
-        {
-          putc (rec2csv_delim, stdout);
-        }
+        putc (rec2csv_delim, stdout);
 
       fex_elem = rec_fex_get (fex, i);
       field_name = xstrdup (rec_fex_elem_field_name (fex_elem));
 
       /* The header is FNAME or FNAME_N where N is the index starting
          at 1.  Note that we shall remove the trailing ':', if any. */
-
       if (field_name[strlen(field_name)-1] == ':')
-        {
-          field_name[strlen(field_name)-1] = '\0';
-        }
+        field_name[strlen(field_name)-1] = '\0';
 
 
       if (rec_fex_elem_min (fex_elem) != 0)
@@ -222,27 +184,22 @@ rec2csv_generate_csv (rec_rset_t rset,
   putc ('\n', stdout);
 
   /* Generate the data rows.  */
-
   iter = rec_mset_iterator (rec_rset_mset (rset));
   while (rec_mset_iterator_next (&iter, MSET_RECORD, (const void**) &record, NULL))
     {
       for (i = 0; i < rec_fex_size (fex); i++)
         {
           if (i != 0)
-            {
-              putc (rec2csv_delim, stdout);
-            }
+            putc (rec2csv_delim, stdout);
 
           fex_elem = rec_fex_get (fex, i);
           field = rec_record_get_field_by_name (record,
                                                 rec_fex_elem_field_name (fex_elem),
                                                 rec_fex_elem_min (fex_elem));
           if (field)
-            {
-              csv_fwrite (stdout,
-                          rec_field_value (field),
-                          strlen (rec_field_value (field)));
-            }
+            csv_fwrite (stdout,
+                        rec_field_value (field),
+                        strlen (rec_field_value (field)));
         }
 
       putc ('\n', stdout);
@@ -260,7 +217,7 @@ rec2csv_determine_fields (rec_rset_t rset)
   rec_record_t record;
   rec_field_t field;
   int field_index;
-  
+
   fields = rec_fex_new (NULL, REC_FEX_SIMPLE);
 
   iter_rset = rec_mset_iterator (rec_rset_mset (rset));
@@ -270,15 +227,13 @@ rec2csv_determine_fields (rec_rset_t rset)
       while (rec_mset_iterator_next (&iter_record, MSET_FIELD, (const void **) &field, NULL))
         {
           field_index = rec_record_get_field_index_by_name (record, field);
-          
+
           if (!rec_fex_member_p (fields,
                                  rec_field_name (field),
                                  field_index, field_index))
-            {
-              rec_fex_append (fields,
-                              rec_field_name (field),
-                              field_index, field_index);
-            }
+            rec_fex_append (fields,
+                            rec_field_name (field),
+                            field_index, field_index);
         }
 
       rec_mset_iterator_free (&iter_record);
@@ -311,13 +266,12 @@ rec2csv_process_data (rec_db_t db)
                   (rec_db_size (db) == 1))))
         {
           /* Process this record set.  */
-
           if (!rec_rset_sort (rset, rec2csv_sort_by_fields))
             recutl_out_of_memory ();
 
           /* Build the fields that will appear in the row. */
           row_fields = rec2csv_determine_fields (rset);
-  
+
           /* Generate the csv data.  */
           rec2csv_generate_csv (rset, row_fields);
 
@@ -345,19 +299,15 @@ main (int argc, char *argv[])
   /* Get the input data.  */
   db = recutl_build_db (argc, argv);
   if (!db)
-    {
-      res = 1;
-    }
+    res = 1;
   else
-    /* Process the data.  */
-    if (!rec2csv_process_data (db))
-      {
+    {
+      /* Process the data.  */
+      if (!rec2csv_process_data (db))
         res = 1;
-      }
+    }
 
   rec_db_destroy (db);
-  
+
   return res;
 }
-
-/* End of rec2csv.c */

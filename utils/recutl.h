@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         recutl.h
- *       Date:         Thu Apr 22 17:29:52 2010
- *
- *       GNU recutils - Common code for the utilities.
- *
- */
+/* recutl.h - Common code for the utilities.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,128 +70,74 @@
 #define RECORD_SELECTION_SHORT_ARGS             \
    "it:e:n:q:m:"
 
-#define RECORD_SELECTION_ARGS_CASES                            \
-    case TYPE_ARG:                                             \
-    case 't':                                                  \
-      {                                                        \
-        recutl_type = xstrdup (optarg);                        \
-        if (!rec_field_name_p (recutl_type))                   \
-          {                                                    \
-             recutl_fatal ("invalid record type %s\n",         \
-                           recutl_type);                       \
-          }                                                    \
-        break;                                                 \
-      }                                                        \
-    case EXPRESSION_ARG:                                       \
-    case 'e':                                                  \
-      {                                                        \
-        if (recutl_num_indexes() != 0)                         \
-          {                                                    \
-            recutl_fatal (_("cannot specify -e and also -n\n"));\
-          }                                                    \
-                                                               \
-        if (recutl_quick_str)                                  \
-          {                                                    \
-            recutl_fatal (_("cannot specify -e and also -q\n"));\
-          }                                                    \
-                                                               \
-         recutl_sex_str = xstrdup (optarg);                    \
-                                                               \
-         /* Compile the search expression.  */                 \
-         if (recutl_sex_str)                                   \
-          {                                                    \
-            recutl_sex = rec_sex_new (recutl_insensitive);     \
-            if (!rec_sex_compile (recutl_sex, recutl_sex_str)) \
-             {                                                 \
-               recutl_fatal(_("invalid selection expression\n"));       \
-             }                                                 \
-          }                                                    \
-                                                               \
-         break;                                                \
-      }                                                        \
-      case NUM_ARG:                                            \
-      case 'n':                                                \
-      {                                                        \
-                                                               \
-         if (recutl_sex)                                       \
-          {                                                    \
-             recutl_fatal(_("cannot specify -n and also -e\n"));\
-          }                                                    \
-                                                               \
-        if (recutl_quick_str)                                  \
-          {                                                    \
-             recutl_fatal(_("cannot specify -n and also -q\n"));\
-          }                                                    \
-                                                               \
-        if (recutl_num_indexes() != 0)                         \
-          {                                                    \
-             recutl_fatal ("please specify just one -n\n");    \
-          }                                                    \
-                                                               \
-        if (!recutl_index_list_parse (optarg))                 \
-          {                                                    \
-            recutl_fatal (_("invalid list of indexes in -n\n")); \
-          }                                                    \
-                                                               \
-          break;                                               \
-      }                                                        \
-      case RANDOM_ARG:                                         \
-      case 'm':                                                \
-      {                                                        \
-        if (recutl_sex)                                        \
-          {                                                    \
-             recutl_fatal (_("cannot specify -m and also -e\n"));\
-          }                                                    \
-                                                               \
-        if (recutl_quick_str)                                  \
-          {                                                    \
-             recutl_fatal (_("cannot specify -m and also -q\n"));\
-          }                                                    \
-                                                               \
-        if (recutl_num_indexes() != 0)                         \
-          {                                                    \
-             recutl_fatal (_("cannot specify -m and also -n\n"));\
-          }                                                    \
-                                                               \
-        if (recutl_random)                                     \
-          {                                                    \
-             recutl_fatal ("please specify just one -m\n");    \
-          }                                                    \
-                                                               \
-        {                                                      \
-          char *end;                                           \
-          long int li = strtol (optarg, &end, 0);              \
-          if (*end != '\0')                                    \
-            {                                                  \
-              recutl_fatal ("invalid number in -m\n");         \
-            }                                                  \
-                                                               \
-          recutl_random = li;                                  \
-        }                                                      \
-                                                               \
-        break;                                                 \
-      }                                                        \
-      case QUICK_ARG:                                          \
-      case 'q':                                                \
-      {                                                        \
-         if (recutl_sex)                                       \
-          {                                                    \
-             recutl_fatal (_("cannot specify -e and also -n\n"));\
-          }                                                    \
-        if (recutl_num_indexes() != 0)                         \
-          {                                                    \
-            recutl_fatal (_("cannot specify -e and also -n\n"));\
-          }                                                    \
-                                                               \
-        recutl_quick_str = xstrdup (optarg);                   \
-        break;                                                 \
-      }                                                        \
-      case INSENSITIVE_ARG:                                    \
-      case 'i':                                                \
-      {                                                        \
-          recutl_insensitive = true;                           \
-          break;                                               \
-      }
+#define RECORD_SELECTION_ARGS_CASES                             \
+  case TYPE_ARG:                                                \
+  case 't':                                                     \
+    recutl_type = xstrdup (optarg);                             \
+    if (!rec_field_name_p (recutl_type))                        \
+    recutl_fatal ("invalid record type %s\n",                   \
+                  recutl_type);                                 \
+    break;                                                      \
+  case EXPRESSION_ARG:                                          \
+  case 'e':                                                     \
+    if (recutl_num_indexes() != 0)                              \
+      recutl_fatal (_("cannot specify -e and also -n\n"));      \
+    if (recutl_quick_str)                                       \
+      recutl_fatal (_("cannot specify -e and also -q\n"));      \
+    recutl_sex_str = xstrdup (optarg);                          \
+                                                                \
+    /* Compile the search expression.  */                       \
+    if (recutl_sex_str)                                         \
+      {                                                         \
+        recutl_sex = rec_sex_new (recutl_insensitive);          \
+        if (!rec_sex_compile (recutl_sex, recutl_sex_str))      \
+          recutl_fatal(_("invalid selection expression\n"));    \
+      }                                                         \
+    break;                                                      \
+  case NUM_ARG:                                                 \
+  case 'n':                                                     \
+    if (recutl_sex)                                             \
+      recutl_fatal(_("cannot specify -n and also -e\n"));       \
+    if (recutl_quick_str)                                       \
+      recutl_fatal(_("cannot specify -n and also -q\n"));       \
+    if (recutl_num_indexes() != 0)                              \
+      recutl_fatal ("please specify just one -n\n");            \
+    if (!recutl_index_list_parse (optarg))                      \
+      recutl_fatal (_("invalid list of indexes in -n\n"));      \
+    break;                                                      \
+  case RANDOM_ARG:                                              \
+  case 'm':                                                     \
+    if (recutl_sex)                                             \
+      recutl_fatal (_("cannot specify -m and also -e\n"));      \
+    if (recutl_quick_str)                                       \
+      recutl_fatal (_("cannot specify -m and also -q\n"));      \
+    if (recutl_num_indexes() != 0)                              \
+      recutl_fatal (_("cannot specify -m and also -n\n"));      \
+    if (recutl_random)                                          \
+      recutl_fatal ("please specify just one -m\n");            \
+                                                                \
+    {                                                           \
+      char *end;                                                \
+      long int li = strtol (optarg, &end, 0);                   \
+      if (*end != '\0')                                         \
+        recutl_fatal ("invalid number in -m\n");                \
+                                                                \
+      recutl_random = li;                                       \
+    }                                                           \
+    break;                                                      \
+  case QUICK_ARG:                                               \
+  case 'q':                                                     \
+    if (recutl_sex)                                             \
+      recutl_fatal (_("cannot specify -e and also -n\n"));      \
+    if (recutl_num_indexes() != 0)                              \
+      recutl_fatal (_("cannot specify -e and also -n\n"));      \
+                                                                \
+    recutl_quick_str = xstrdup (optarg);                        \
+    break;                                                      \
+  case INSENSITIVE_ARG:                                         \
+  case 'i':                                                     \
+    recutl_insensitive = true;                                  \
+    break;
 
 #if defined REC_CRYPT_SUPPORT
 #  define ENCRYPTION_SHORT_ARGS "s:"
@@ -262,6 +200,4 @@ void recutl_reset_indexes (void);
 
 size_t *recutl_index (void);
 
-#endif /* recutl.h */
-
-/* End of recutl.h */
+#endif /* ! RECUTL_H */

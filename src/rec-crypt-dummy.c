@@ -1,11 +1,4 @@
-/* -*- mode: C -*- Time-stamp: "2020-01-28 15:38:40 jemarch"
- *
- *       File:         rec-crypt-dummy.c
- *       Date:         Tue Mar 27 21:29:06 2012
- *
- *       GNU recutils - Dummy replacements for encryption routines
- *
- */
+/* rec-crypt-dummy.c - dummy replacements for encryption routines.  */
 
 /* Copyright (C) 2012-2020 Michał Masłowski */
 
@@ -76,5 +69,3 @@ rec_decrypt_record (rec_rset_t rset,
 {
   return false;
 }
-
-/* End of rec-crypt-dummy.c */

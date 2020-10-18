@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         recfix.c
- *       Date:         Tue Apr 27 12:21:48 2010
- *
- *       GNU recutils - recfix
- *
- */
+/* recfix.c - Fix and analyze a recfile.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,17 +26,6 @@
 
 #include <rec.h>
 #include <recutl.h>
-
-/* Forward prototypes.  */
-static void recfix_parse_args (int argc, char **argv);
-static bool recfix_check_database (rec_db_t db);
-
-static int recfix_do_check (void);
-static int recfix_do_sort (void);
-#if defined REC_CRYPT_SUPPORT
-static int recfix_do_crypt (void);
-#endif
-static int recfix_do_auto (void);
 
 /*
  * Data types.
@@ -191,105 +172,68 @@ recfix_parse_args (int argc,
         {
           COMMON_ARGS_CASES
         case NO_EXTERNAL_ARG:
-          {
-            recfix_external = false;
-            break;
-          }
+          recfix_external = false;
+          break;
         case FORCE_ARG:
-          {
-            recfix_force = true;
-            break;
-          }
+          recfix_force = true;
+          break;
 #if defined REC_CRYPT_SUPPORT
         case 's':
         case PASSWORD_ARG:
-          {
-            if (recfix_op == RECFIX_OP_INVALID)
-              {
-                recutl_fatal (_("--password|-s must be used as an operation argument.\n"));
-              }
+          if (recfix_op == RECFIX_OP_INVALID)
+            recutl_fatal (_("--password|-s must be used as an operation argument.\n"));
 
-            if ((recfix_op != RECFIX_OP_ENCRYPT)
-                && (recfix_op != RECFIX_OP_DECRYPT))
-              {
-                recutl_fatal (_("the specified operation does not require a password.\n"));
-              }
+          if ((recfix_op != RECFIX_OP_ENCRYPT)
+              && (recfix_op != RECFIX_OP_DECRYPT))
+            recutl_fatal (_("the specified operation does not require a password.\n"));
 
-            if (recfix_password != NULL)
-              {
-                recutl_fatal (_("please specify just one password.\n"));
-              }
+          if (recfix_password != NULL)
+            recutl_fatal (_("please specify just one password.\n"));
 
-            recfix_password = xstrdup (optarg);
-            break;
-          }
+          recfix_password = xstrdup (optarg);
+          break;
 #endif /* REC_CRYPT_SUPPORT */
         case OP_CHECK_ARG:
-          {
-            if (recfix_op != RECFIX_OP_INVALID)
-              {
-                recutl_fatal (_("please specify just one operation.\n"));
-              }
+          if (recfix_op != RECFIX_OP_INVALID)
+            recutl_fatal (_("please specify just one operation.\n"));
 
-            recfix_op = RECFIX_OP_CHECK;
-            break;
-          }
+          recfix_op = RECFIX_OP_CHECK;
+          break;
         case OP_SORT_ARG:
-          {
-            if (recfix_op != RECFIX_OP_INVALID)
-              {
-                recutl_fatal (_("please specify just one operation.\n"));
-              }
+          if (recfix_op != RECFIX_OP_INVALID)
+            recutl_fatal (_("please specify just one operation.\n"));
 
-            recfix_op = RECFIX_OP_SORT;
-            break;
-          }
+          recfix_op = RECFIX_OP_SORT;
+          break;
         case OP_AUTO_ARG:
-          {
-            if (recfix_op != RECFIX_OP_INVALID)
-              {
-                recutl_fatal (_("please specify just one operation.\n"));
-              }
+          if (recfix_op != RECFIX_OP_INVALID)
+            recutl_fatal (_("please specify just one operation.\n"));
 
-            recfix_op = RECFIX_OP_AUTO;
-            break;
-          }
+          recfix_op = RECFIX_OP_AUTO;
+          break;
 #if defined REC_CRYPT_SUPPORT
         case OP_ENCRYPT_ARG:
-          {
-            if (recfix_op != RECFIX_OP_INVALID)
-              {
-                recutl_fatal (_("please specify just one operation.\n"));
-              }
+          if (recfix_op != RECFIX_OP_INVALID)
+            recutl_fatal (_("please specify just one operation.\n"));
 
-            recfix_op = RECFIX_OP_ENCRYPT;
-            break;
-          }
+          recfix_op = RECFIX_OP_ENCRYPT;
+          break;
         case OP_DECRYPT_ARG:
-          {
-            if (recfix_op != RECFIX_OP_INVALID)
-              {
-                recutl_fatal (_("please specify just one operation.\n"));
-              }
+          if (recfix_op != RECFIX_OP_INVALID)
+            recutl_fatal (_("please specify just one operation.\n"));
 
-            recfix_op = RECFIX_OP_DECRYPT;
-            break;
-          }
+          recfix_op = RECFIX_OP_DECRYPT;
+          break;
 #endif /* REC_CRYPT_SUPPORT */
         default:
-          {
-            exit (EXIT_FAILURE);
-          }
+          exit (EXIT_FAILURE);
         }
     }
 
   /* The default operation is check, in case the user did not specify
      any in the command line.  */
-
   if (recfix_op == RECFIX_OP_INVALID)
-    {
-      recfix_op = RECFIX_OP_CHECK;
-    }
+    recfix_op = RECFIX_OP_CHECK;
 
 #if defined REC_CRYPT_SUPPORT
   /* The encrypt and decrypt operations require the user to specify a
@@ -304,19 +248,13 @@ recfix_parse_args (int argc,
       if (recutl_interactive ())
         {
           if (recfix_op == RECFIX_OP_ENCRYPT)
-            {
-              recfix_password = recutl_getpass (true);
-            }
+            recfix_password = recutl_getpass (true);
           else
-            {
-              recfix_password = recutl_getpass (false);
-            }
+            recfix_password = recutl_getpass (false);
         }
 
       if (!recfix_password || (strlen (recfix_password) == 0))
-        {
-          recutl_fatal ("please specify a password.\n");
-        }
+        recutl_fatal ("please specify a password.\n");
     }
 #endif /* REC_CRYPT_SUPPORT */
 
@@ -368,9 +306,7 @@ recfix_do_check ()
     }
 
   if (!recfix_check_database (db))
-    {
-      return EXIT_FAILURE;
-    }
+    return EXIT_FAILURE;
 
   return EXIT_SUCCESS;
 }
@@ -399,11 +335,9 @@ recfix_do_sort ()
       if (!rec_rset_sort (rset, NULL))
         recutl_out_of_memory ();
     }
-  
+
   if (!recfix_check_database (db))
-    {
-      return EXIT_FAILURE;
-    }
+    return EXIT_FAILURE;
 
   if (!recutl_file_is_writable (recfix_file))
     {
@@ -447,9 +381,7 @@ recfix_do_crypt ()
 
       confidential_fields = rec_rset_confidential (rset);
       if (confidential_fields == NULL)
-        {
-          continue;
-        }
+        continue;
 
       /* Process every record of the record set.  */
 
@@ -524,9 +456,7 @@ recfix_do_auto ()
     }
 
   if (!recfix_check_database (db))
-    {
-      return EXIT_FAILURE;
-    }
+    return EXIT_FAILURE;
 
   recutl_write_db_to_file (db, recfix_file);
   return EXIT_SUCCESS;
@@ -549,38 +479,25 @@ main (int argc, char *argv[])
   switch (recfix_op)
     {
     case RECFIX_OP_CHECK:
-      {
-        res = recfix_do_check ();
-        break;
-      }
+      res = recfix_do_check ();
+      break;
     case RECFIX_OP_SORT:
-      {
-        res = recfix_do_sort ();
-        break;
-      }
+      res = recfix_do_sort ();
+      break;
     case RECFIX_OP_AUTO:
-      {
-        res = recfix_do_auto ();
-        break;
-      }
+      res = recfix_do_auto ();
+      break;
 #if defined REC_CRYPT_SUPPORT
     case RECFIX_OP_ENCRYPT:
     case RECFIX_OP_DECRYPT:
-      {
-        res = recfix_do_crypt ();
-        break;
-      }
+      res = recfix_do_crypt ();
+      break;
 #endif /* REC_CRYPT_SUPPORT */
     default:
-      {
-        /* This point shall not be reached.  */
-
-        res = EXIT_FAILURE;
-        recutl_fatal (_("unknown operation in recfix: please report this as a bug.\n"));
-      }
+      /* This point shall not be reached.  */
+      res = EXIT_FAILURE;
+      recutl_fatal (_("unknown operation in recfix: please report this as a bug.\n"));
     }
 
   return res;
 }
-
-/* End of recfix.c */

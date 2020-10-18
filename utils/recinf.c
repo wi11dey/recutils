@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         recinf.c
- *       Date:         Mon Dec 28 08:54:38 2009
- *
- *       GNU recutils - recinf
- *
- */
+/* recinf.c - Getting information about recfiles.  */
 
-/* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
- * 2018, 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2009-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,7 +103,7 @@ Print information about the types of records stored in the input.\n"),
 Special options:\n\
   -S, --print-sexps                   print the data in sexps instead of rec format.\n"),
          stdout);
-  
+
   puts ("");
   recutl_print_help_footer ();
 }
@@ -141,14 +133,12 @@ print_info_file (FILE *in,
           if (recinf_type
               && descriptor
               && (strcmp (rec_rset_type (rset), recinf_type) != 0))
-            {
-              continue;
-            }
+            continue;
 
           if (recinf_descriptor)
             {
               rec_writer_t writer;
-              
+
               if (descriptor)
                 {
                   writer = rec_writer_new (stdout);
@@ -160,44 +150,34 @@ print_info_file (FILE *in,
               else
                 {
                   if (recinf_write_mode == REC_WRITER_NORMAL)
-                    {
-                      printf ("unknown\n");
-                    }
+                    printf ("unknown\n");
                 }
 
               if (position < (rec_db_size (db) - 1))
-                {
-                  printf ("\n");
-                }
+                printf ("\n");
             }
           else
             {
               if (descriptor)
                 {
                   if (!recinf_names_only)
-                    {
-                      fprintf (stdout, "%zd ", rec_rset_num_records (rset));
-                    }
+                    fprintf (stdout, "%zd ", rec_rset_num_records (rset));
+
                   fprintf (stdout, "%s\n", rec_rset_type (rset));
                 }
               else
                 {
                   if (!recinf_names_only)
-                    {
-                      printf ("%zd\n", rec_rset_num_records (rset));
-                    }
+                    printf ("%zd\n", rec_rset_num_records (rset));
                 }
-            }          
+            }
         }
     }
-  
+
   if (rec_parser_error (parser))
-    {
-      rec_parser_perror (parser, file_name);
-    }
+    rec_parser_perror (parser, file_name);
 
   rec_parser_destroy (parser);
-
   return ret;
 }
 
@@ -223,32 +203,22 @@ main (int argc, char *argv[])
           COMMON_ARGS_CASES
         case PRINT_SEXPS_ARG:
         case 'S':
-          {
-            recinf_write_mode = REC_WRITER_SEXP;
-            break;
-          }
+          recinf_write_mode = REC_WRITER_SEXP;
+          break;
         case DESCRIPTOR_ARG:
         case 'd':
-          {
-            recinf_descriptor = true;
-            break;
-          }
+          recinf_descriptor = true;
+          break;
         case NAMES_ARG:
         case 'n':
-          {
-            recinf_names_only = true;
-            break;
-          }
+          recinf_names_only = true;
+          break;
         case TYPE_ARG:
         case 't':
-          {
-            recinf_type = xstrdup (optarg);
-            break;
-          }
+          recinf_type = xstrdup (optarg);
+          break;
         default:
-          {
-            exit (EXIT_FAILURE);
-          }
+          exit (EXIT_FAILURE);
         }
     }
 
@@ -267,10 +237,8 @@ main (int argc, char *argv[])
           else
             {
               if (!print_info_file (in, file_name))
-                {
-                  /* Parse error */
-                  exit (EXIT_FAILURE);
-                }
+                /* Parse error */
+                exit (EXIT_FAILURE);
 
               fclose (in);
             }
@@ -279,13 +247,9 @@ main (int argc, char *argv[])
   else
     {
       if (!print_info_file (stdin, "stdin"))
-        {
-          /* Parse error */
-          exit (EXIT_FAILURE);
-        }
+        /* Parse error */
+        exit (EXIT_FAILURE);
     }
-  
+
   return EXIT_SUCCESS;
 }
-
-/* End of recinf.c */

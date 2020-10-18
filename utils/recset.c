@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         recset.c
- *       Date:         Fri Apr  9 17:06:39 2010
- *
- *       GNU recutils - recset
- *
- */
+/* recset.c - Set and update the values of fields.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,13 +27,6 @@
 
 #include <rec.h>
 #include <recutl.h>
-
-/*
- * Forward prototypes.
- */
-
-static void recset_parse_args (int argc, char **argv);
-static void recset_process_actions (rec_db_t db);
 
 /*
  * Global variables.
@@ -196,106 +181,75 @@ recset_parse_args (int argc,
           COMMON_ARGS_CASES
           RECORD_SELECTION_ARGS_CASES
         case FORCE_ARG:
-          {
-            recset_force = true;
-            break;
-          }
+          recset_force = true;
+          break;
         case VERBOSE_ARG:
-          {
-            recset_verbose = true;
-            break;
-          }
+          recset_verbose = true;
+          break;
         case FIELD_EXPR_ARG:
         case 'f':
-          {
-            recutl_fex_str = xstrdup (optarg);
-            if (!rec_fex_check (recutl_fex_str, REC_FEX_SUBSCRIPTS))
-              {
-                recutl_fatal (_("invalid field expression in -f.\n"));
-              }
+          recutl_fex_str = xstrdup (optarg);
+          if (!rec_fex_check (recutl_fex_str, REC_FEX_SUBSCRIPTS))
+            recutl_fatal (_("invalid field expression in -f.\n"));
 
-            /* Create the field expression.  */
-            recutl_fex = rec_fex_new (recutl_fex_str,
-                                      REC_FEX_SUBSCRIPTS);
-            if (!recutl_fex)
-              {
-                recutl_fatal (_("creating the field expression.\n"));
-              }
+          /* Create the field expression.  */
+          recutl_fex = rec_fex_new (recutl_fex_str,
+                                    REC_FEX_SUBSCRIPTS);
+          if (!recutl_fex)
+            recutl_fatal (_("creating the field expression.\n"));
 
-            /* Sort it.  */
-            rec_fex_sort (recutl_fex);
-
-            break;
-          }
+          /* Sort it.  */
+          rec_fex_sort (recutl_fex);
+          break;
         case SET_ACTION_ARG:
         case 's':
-          {
-            CHECK_ACTION_PREREQ;
-            recset_action = REC_SET_ACT_SET;
-            recset_value = xstrdup (optarg);
-            break;
-          }
+          CHECK_ACTION_PREREQ;
+          recset_action = REC_SET_ACT_SET;
+          recset_value = xstrdup (optarg);
+          break;
         case RENAME_ACTION_ARG:
         case 'r':
-          {
-            CHECK_ACTION_PREREQ;
-            if (rec_fex_size (recutl_fex) != 1)
-              {
-                recutl_fatal (_("the rename operation requires just one field with an optional subscript.\n"));
-              }
+          CHECK_ACTION_PREREQ;
+          if (rec_fex_size (recutl_fex) != 1)
+            recutl_fatal (_("the rename operation requires just one\
+ field with an optional subscript.\n"));
 
-            recset_action = REC_SET_ACT_RENAME;
-            recset_value = xstrdup (optarg);
+          recset_action = REC_SET_ACT_RENAME;
+          recset_value = xstrdup (optarg);
 
-            /* Validate the new name.  */
-            recset_new_field_name = recset_value;
-            if (!rec_field_name_p (recset_new_field_name))
-              {
-                recutl_fatal (_("invalid field name %s.\n"), recset_value);
-              }
-            
-            break;
-          }
+          /* Validate the new name.  */
+          recset_new_field_name = recset_value;
+          if (!rec_field_name_p (recset_new_field_name))
+            recutl_fatal (_("invalid field name %s.\n"), recset_value);
+          break;
         case ADD_ACTION_ARG:
         case 'a':
-          {
-            CHECK_ACTION_PREREQ;
-            recset_action = REC_SET_ACT_ADD;
-            recset_value = xstrdup (optarg);
-            break;
-          }
+          CHECK_ACTION_PREREQ;
+          recset_action = REC_SET_ACT_ADD;
+          recset_value = xstrdup (optarg);
+          break;
         case SET_ADD_ACTION_ARG:
         case 'S':
-          {
-            CHECK_ACTION_PREREQ;
-            recset_action = REC_SET_ACT_SETADD;
-            recset_value = xstrdup (optarg);
-            break;
-          }
+          CHECK_ACTION_PREREQ;
+          recset_action = REC_SET_ACT_SETADD;
+          recset_value = xstrdup (optarg);
+          break;
         case DELETE_ACTION_ARG:
         case 'd':
-          {
-            CHECK_ACTION_PREREQ;
-            recset_action = REC_SET_ACT_DELETE;
-            break;
-          }
+          CHECK_ACTION_PREREQ;
+          recset_action = REC_SET_ACT_DELETE;
+          break;
         case COMMENT_ACTION_ARG:
         case 'c':
-          {
-            CHECK_ACTION_PREREQ;
-            recset_action = REC_SET_ACT_COMMENT;
-            break;
-          }
+          CHECK_ACTION_PREREQ;
+          recset_action = REC_SET_ACT_COMMENT;
+          break;
         case NO_EXTERNAL_ARG:
-          {
-            recset_external = false;
-            break;
-          }
+          recset_external = false;
+          break;
         default:
-          {
-            exit (EXIT_FAILURE);
-            break;
-          }
+          exit (EXIT_FAILURE);
+          break;
         }
     }
 
@@ -310,7 +264,6 @@ recset_parse_args (int argc,
 
       recset_file = argv[optind++];
     }
-
 }
 
 static void
@@ -319,9 +272,7 @@ recset_process_actions (rec_db_t db)
   int flags = 0;
 
   if (recutl_insensitive)
-    {
-      flags = flags | REC_F_ICASE;
-    }
+    flags = flags | REC_F_ICASE;
 
   if (!rec_db_set (db,
                    recutl_type,
@@ -334,20 +285,17 @@ recset_process_actions (rec_db_t db)
                    recset_value,
                    flags))
     recutl_out_of_memory ();
-  
-  /* Check the integrity of the resulting database.  */
 
+  /* Check the integrity of the resulting database.  */
   if (!recset_force && db)
-    {
-      recutl_check_integrity (db, recset_verbose, recset_external);
-    }
+    recutl_check_integrity (db, recset_verbose, recset_external);
 }
 
 int
 main (int argc, char *argv[])
 {
   rec_db_t db;
-  
+
   recutl_init ("recset");
 
   /* Parse arguments.  */
@@ -355,9 +303,7 @@ main (int argc, char *argv[])
 
   db = recutl_read_db_from_file (recset_file);
   if (!db)
-    {
-      recutl_fatal (_("cannot read file %s\n"), recset_file);
-    }
+    recutl_fatal (_("cannot read file %s\n"), recset_file);
 
   recset_process_actions (db);
 
@@ -370,5 +316,3 @@ main (int argc, char *argv[])
 
   return EXIT_SUCCESS;
 }
-
-/* End of recset.c */

@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         recutl.c
- *       Date:         Thu Apr 22 17:30:48 2010
- *
- *       GNU recutils - Common code for the utilities.
- *
- */
+/* recutl.c - Common code for the utilities.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,11 +91,9 @@ recutl_init (char *util_name)
   textdomain (PACKAGE);
 
   /* Detect whether the tool has been invoked interactively.  */
-  
   recutl_interactive_p = isatty (fileno(stdin));
 
   /* Initially there are no indexes.  */
-
   recutl_reset_indexes ();
 }
 
@@ -177,7 +167,7 @@ recutl_print_version (void)
 
   /* It is important to separate the year from the rest of the message,
      as done here, to avoid having to retranslate the message when a new
-     year comes around.  */  
+     year comes around.  */
   printf (_("\
 Copyright (C) %s Jose E. Marchesi.\n\
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\n\
@@ -280,7 +270,7 @@ recutl_parse_db_from_file (FILE *in,
               return true;
             }
         }
-          
+
       if (!rec_db_insert_rset (db, rset, rec_db_size (db)))
         {
           /* Error.  */
@@ -309,13 +299,11 @@ recutl_build_db (int argc, char **argv)
 
   db = rec_db_new ();
   if (!db)
-    {
-      return NULL;
-    }
+    return NULL;
 
   /* Register the default functions in the database.  */
 
-  
+
 
   /* Process the input files, if any.  Otherwise use the standard
      input to read the rec data.  */
@@ -326,9 +314,7 @@ recutl_build_db (int argc, char **argv)
         {
           file_name = argv[optind++];
           if (!(in = fopen (file_name, "r")))
-            {
-              recutl_fatal (_("cannot read file %s\n"), file_name);
-            }
+            recutl_fatal (_("cannot read file %s\n"), file_name);
           else
             {
               if (!recutl_parse_db_from_file (in, file_name, db))
@@ -336,7 +322,7 @@ recutl_build_db (int argc, char **argv)
                   free (db);
                   db = NULL;
                 }
-              
+
               fclose (in);
             }
         }
@@ -364,9 +350,7 @@ recutl_read_db_from_file (char *file_name)
     {
       in = fopen (file_name, "r");
       if (in == NULL)
-        {
-           return NULL;
-        }
+        return NULL;
     }
   else
     {
@@ -404,9 +388,7 @@ recutl_write_db_to_file (rec_db_t db,
   int stat_result;
 
   if (!file_name)
-    {
-      out = stdout;
-    }
+    out = stdout;
   else
     {
       /* Record the original file attributes. */
@@ -425,9 +407,7 @@ recutl_write_db_to_file (rec_db_t db,
   rec_write_db (writer, db);
 
   if (file_name)
-    {
-      fclose (out);
-    }
+    fclose (out);
 
   rec_db_destroy (db);
 
@@ -443,9 +423,7 @@ recutl_write_db_to_file (rec_db_t db,
 
       /* Restore the attributes of the original file. */
       if (stat_result != -1)
-        {
-          chmod (file_name, st1.st_mode);
-        }
+        chmod (file_name, st1.st_mode);
     }
 }
 
@@ -518,7 +496,7 @@ recutl_yesno (char *prompt)
         }
 
       printf ("Please answer 'yes' or 'no'.\n");
-    }           
+    }
 
   return res;
 }
@@ -542,13 +520,10 @@ recutl_index_list_parse (const char *str)
   free (recutl_indexes);
   recutl_indexes = xmalloc (sizeof (size_t) * (strlen (str) * 2 + 2));
   for (i = 0; i < (strlen (str) * 2 + 2); i++)
-    {
-      recutl_indexes[i] = REC_Q_NOINDEX;
-    }
-  
+    recutl_indexes[i] = REC_Q_NOINDEX;
+
   /* Make sure the string is valid.  The code below relies on this
      fact.  */
-
   if (regcomp (&regexp, "^" INDEX_LIST_RE "$", REG_EXTENDED) != 0)
     {
       recutl_fatal (_("internal error: recutl_index_list_parse: error compiling regexp.\n"));
@@ -564,18 +539,15 @@ recutl_index_list_parse (const char *str)
   regfree (&regexp);
 
   /* Parse the string. */
-
   p = str;
   while (true)
     {
       /* Get the 'min' part of the entry.  */
-
       number = strtol (p, &end, 10);
       recutl_indexes[recutl_indexes_size] = (size_t) number;
       p = end;
 
       /* Get the 'max' part of the entry, if any.  */
-      
       if (*p == '-')
         {
           p++;
@@ -587,15 +559,10 @@ recutl_index_list_parse (const char *str)
       recutl_indexes_size = recutl_indexes_size + 2;
 
       /* Exit or pass the separator.  */
-
       if (*p == '\0')
-        {
-          break;
-        }
+        break;
       else
-        {
-          p++;
-        }
+        p++;
     }
 
   return res;
@@ -653,5 +620,3 @@ recutl_getpass (bool asktwice)
 
   return ret;
 }
-
-/* End of recutl.c */

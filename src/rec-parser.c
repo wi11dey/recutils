@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-parser.c
- *       Date:         Wed Dec 23 20:55:15 2009
- *
- *       GNU recutils - Parsing routines
- *
- */
+/* rec-parser.c - Parsing routines.  */
 
-/* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
- * 2018, 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2009-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,22 +29,6 @@
 #include <rec-utils.h>
 
 /*
- * Static functions defined in this file
- */
-static int rec_parser_getc (rec_parser_t parser);
-static int rec_parser_ungetc (rec_parser_t parser, int ci);
-
-static bool rec_expect (rec_parser_t parser, const char *str);
-
-static bool rec_parse_field_value (rec_parser_t parser, char **str);
-
-static bool rec_parse_comment (rec_parser_t parser, rec_comment_t *comment);
-
-static bool rec_parser_digit_p (char c);
-static bool rec_parser_letter_p (char c);
-static bool rec_parser_init_common (rec_parser_t parser, const char *source);
-
-/*
  * Parser Data Structure
  */
 
@@ -77,7 +53,7 @@ struct rec_parser_s
   const char *p;          /* Pointer to the next unreaded character in
                              in_buffer */
   char *source;
-  
+
   rec_record_t prev_descriptor;
 
   bool eof;
@@ -107,9 +83,399 @@ const char *rec_parser_error_strings[] =
 
 #define FNAME(id) rec_std_field_name ((id))
 
-/*
- * Public functions.
- */
+static int
+rec_parser_getc (rec_parser_t parser)
+{
+  int ci;
+
+  /* Get the input character depending on the backend used (memory or
+     file).  */
+  if (parser->in_file)
+    ci = getc (parser->in_file);
+  else if (parser->in_buffer)
+    {
+      if (parser->p == parser->in_buffer + parser->in_size)
+        ci = EOF;
+      else
+        {
+          ci = *(parser->p);
+          parser->p++;
+        }
+    }
+  else
+    {
+      /* This point should not be reached!  */
+      fprintf (stderr, "rec_parser_getc: no backend in parser. This is a bug.\
+  Please report it.");
+      return EOF;
+    }
+
+  /* Manage EOF and update statistics.  */
+  if (ci == EOF)
+    parser->eof = true;
+  else
+    {
+      parser->character++;
+      if (((char) ci) == '\n')
+        parser->line++;
+    }
+
+  return ci;
+}
+
+int
+rec_parser_ungetc (rec_parser_t parser,
+                   int ci)
+{
+  int res;
+
+  /* Update statistics.  */
+  parser->character--;
+  if (((char) ci) == '\n')
+    parser->line--;
+
+  /* Unread the character, depending on the backend used (memory or
+     file).  */
+  if (parser->in_file)
+    {
+      res = ungetc (ci, parser->in_file);
+      if (res != ci)
+        parser->error = REC_PARSER_EUNGETC;
+    }
+  else if (parser->in_buffer)
+    {
+      if (parser->p > parser->in_buffer)
+        {
+          res = ci; /* Emulate ungetc. */
+          parser->p--;
+        }
+      else
+        {
+          res = EOF;
+          parser->error = REC_PARSER_EUNGETC;
+        }
+    }
+  else
+    {
+      /* This point should not be reached!  */
+      fprintf (stderr, "rec_parser_ungetc: no backend in parser. This is a bug.\
+  Please report it.");
+      return EOF;
+    }
+
+  return res;
+}
+
+static bool
+rec_parser_digit_p (char c)
+{
+  return ((c >= '0') && (c <= '9'));
+}
+
+static bool
+rec_parser_letter_p (char c)
+{
+  return (((c >= 'A') && (c <= 'Z'))
+          || ((c >= 'a') && (c <= 'z')));
+}
+
+static bool
+rec_expect (rec_parser_t parser,
+            const char *str)
+{
+  size_t str_size;
+  size_t counter;
+  bool found;
+  int ci;
+  char c;
+
+  found = true;
+  str_size = strlen (str);
+
+  for (counter = 0;
+       counter < str_size;
+       counter++)
+    {
+      ci = rec_parser_getc (parser);
+      if (ci == EOF)
+        {
+          /* EOF */
+          found = false;
+          parser->eof = true;
+          break;
+        }
+      else
+        {
+          c = (char) ci;
+          if (c != str[counter])
+            {
+              /* Not match */
+              rec_parser_ungetc (parser, ci);
+              found = false;
+              break;
+            }
+        }
+    }
+
+  return found;
+}
+
+static bool
+rec_parse_field_value (rec_parser_t parser,
+                       char **str)
+{
+  bool ret;
+  int ci, ci2;
+  char c, c2;
+  size_t str_size;
+  bool prev_newline;
+  rec_buf_t buf;
+
+  /* Sanity check */
+  if (rec_parser_eof (parser)
+      || rec_parser_error (parser))
+    return false;
+
+  c = '\0';
+  prev_newline = false;
+  ret = true;
+  buf = rec_buf_new (str, &str_size);
+  if (!buf)
+    {
+      /* Out of memory */
+      parser->error = REC_PARSER_ENOMEM;
+      return false;
+    }
+
+  /* A field value is a sequence of zero or more ascii codes finished
+   * with a newline character.
+   *
+   *  \$ is translated to nothing.
+   *  $+ ? is translated to $.
+   */
+  while ((ci = rec_parser_getc (parser)) != EOF)
+    {
+      c = (char) ci;
+
+      if ((prev_newline) && (c != '+'))
+        {
+          /* End of value */
+          rec_parser_ungetc (parser, ci);
+          rec_buf_rewind (buf, 1);
+          break;
+        }
+
+      if (c == '\\')
+        {
+          ci2 = rec_parser_getc (parser);
+          if (ci2 == EOF)
+            {
+              parser->eof = true;
+              ret = false;
+              break;
+            }
+          else
+            {
+              c2 = (char) ci2;
+              if (c2 == '\n')
+                {
+                  /* Consume both $\n chars not adding them to str =>
+                     do nothing here. */
+                }
+              else
+                {
+                  /* Add \ and put back c2 */
+                  if (rec_buf_putc (c, buf) == EOF)
+                    {
+                      /* Out of memory */
+                      parser->error = REC_PARSER_ENOMEM;
+                      return false;
+                    }
+
+                  if (parser->error > 0)
+                    {
+                      break;
+                    }
+
+                  if (rec_parser_ungetc (parser, ci2)
+                      != ci2)
+                    {
+                      ret = false;
+                      break;
+                    }
+                }
+            }
+
+          prev_newline = false;
+        }
+      else if (c == '+')
+        {
+          if (prev_newline)
+            {
+              /* Reduce \n+ ? to \n by ignoring the + ? */
+              ci2 = rec_parser_getc (parser);
+
+              if (ci2 == EOF)
+                {
+                  parser->eof = true;
+                  ret = false;
+                  break;
+                }
+              else
+                {
+                  c2 = (char) ci2;
+                  /* If the look ahead character is a blank, skip it.
+                     Otherwise put it back in the stream so it will be
+                     processed in the next iteration. */
+                  if (c2 != ' ')
+                    {
+                      if (rec_parser_ungetc (parser, ci2) != ci2)
+                        {
+                          ret = false;
+                          break;
+                        }
+                    }
+                }
+            }
+          else
+            {
+              if (rec_buf_putc (c, buf) == EOF)
+                {
+                  /* Out of memory */
+                  parser->error = REC_PARSER_ENOMEM;
+                  return false;
+                }
+
+              if (parser->error > 0)
+                break;
+            }
+
+          prev_newline = false;
+        }
+      else if (c == '\n')
+        {
+          if (rec_buf_putc (c, buf) == EOF)
+            {
+              /* Out of memory */
+              parser->error = REC_PARSER_ENOMEM;
+              return false;
+            }
+
+          if (parser->error > 0)
+            break;
+          prev_newline = true;
+        }
+      else
+        {
+          if (rec_buf_putc (c, buf) == EOF)
+            {
+              /* Out of memory */
+              parser->error = REC_PARSER_ENOMEM;
+              return false;
+            }
+
+          if (parser->error > 0)
+            break;
+          prev_newline = false;
+        }
+    }
+
+  if (ret)
+    {
+      if (rec_parser_eof (parser) && (c == '\n'))
+        /* Special case: field just before EOF */
+        rec_buf_rewind (buf, 1);
+    }
+
+  rec_buf_close (buf);
+
+  if (!ret)
+    free (*str);
+
+  return ret;
+}
+
+static bool
+rec_parse_comment (rec_parser_t parser, rec_comment_t *comment)
+{
+  bool ret;
+  rec_buf_t buf;
+  char *str;
+  size_t str_size;
+  int ci;
+  char c;
+
+  ret = false;
+  buf = rec_buf_new (&str, &str_size);
+
+  /* Comments start at the beginning of line and span until the first
+   * \n character not followed by a #, or EOF.
+   */
+  if (rec_expect (parser, "#"))
+    {
+      while ((ci = rec_parser_getc (parser)) != EOF)
+        {
+          c = (char) ci;
+
+          if (c == '\n')
+            {
+              if ((ci = rec_parser_getc (parser)) == EOF)
+                break;
+              c = (char) ci;
+
+              if (c != '#')
+                {
+                  rec_parser_ungetc (parser, ci);
+                  break;
+                }
+              else
+                c = '\n';
+            }
+
+          if (rec_buf_putc (c, buf) == EOF)
+            {
+              /* Out of memory */
+              parser->error = REC_PARSER_ENOMEM;
+              return false;
+            }
+        }
+
+      ret = true;
+    }
+
+  rec_buf_close (buf);
+
+  if (ret)
+    *comment = rec_comment_new (str);
+  else
+    *comment = NULL;
+
+  free (str);
+  return ret;
+}
+
+static bool
+rec_parser_init_common (rec_parser_t parser,
+                        const char *source)
+{
+  if (source)
+    {
+      parser->source = strdup (source);
+      if (!parser->source)
+        return false;
+    }
+  else
+    parser->source = NULL;
+
+  parser->eof = false;
+  parser->error = REC_PARSER_NOERROR;
+  parser->line = 1;
+  parser->character = 0;
+  parser->prev_descriptor = NULL;
+  parser->p = parser->in_buffer;
+
+  return true;
+}
 
 rec_parser_t
 rec_parser_new (FILE *in,
@@ -337,7 +703,7 @@ rec_parse_field_name (rec_parser_t parser,
             rec_parser_ungetc (parser, c);
         }
     }
-  
+
   return ret;
 }
 
@@ -678,7 +1044,7 @@ rec_parse_field_name_str (const char *str)
       str2[str_size] = ':';
       str2[str_size + 1] = '\0';
     }
-  
+
   parser = rec_parser_new_str (str2, "dummy");
   if (!rec_parse_field_name (parser, &field_name))
     field_name = NULL;
@@ -757,407 +1123,3 @@ rec_parser_tell (rec_parser_t parser)
       return -1;
     }
 }
-
-/*
- * Private functions
- */
-
-static int
-rec_parser_getc (rec_parser_t parser)
-{
-  int ci;
-
-  /* Get the input character depending on the backend used (memory or
-     file).  */
-  if (parser->in_file)
-    ci = getc (parser->in_file);
-  else if (parser->in_buffer)
-    {
-      if (parser->p == parser->in_buffer + parser->in_size)
-        ci = EOF;
-      else
-        {
-          ci = *(parser->p);
-          parser->p++;
-        }
-    }
-  else
-    {
-      /* This point should not be reached!  */
-      fprintf (stderr, "rec_parser_getc: no backend in parser. This is a bug.\
-  Please report it.");
-      return EOF;
-    }
-
-  /* Manage EOF and update statistics.  */
-
-  if (ci == EOF)
-    parser->eof = true;
-  else 
-    {
-      parser->character++;
-      if (((char) ci) == '\n')
-        parser->line++;
-    }
-
-  return ci;
-}
-
-int
-rec_parser_ungetc (rec_parser_t parser,
-                   int ci)
-{
-  int res;
-
-  /* Update statistics.  */
-
-  parser->character--;
-  if (((char) ci) == '\n')
-    parser->line--;
-
-  /* Unread the character, depending on the backend used (memory or
-     file).  */
-
-  if (parser->in_file)
-    {
-      res = ungetc (ci, parser->in_file);
-      if (res != ci)
-        parser->error = REC_PARSER_EUNGETC;
-    }
-  else if (parser->in_buffer)
-    {
-      if (parser->p > parser->in_buffer)
-        {
-          res = ci; /* Emulate ungetc. */
-          parser->p--;
-        }
-      else
-        {
-          res = EOF;
-          parser->error = REC_PARSER_EUNGETC;
-        }
-    }
-  else
-    {
-
-      /* This point should not be reached!  */
-      fprintf (stderr, "rec_parser_ungetc: no backend in parser. This is a bug.\
-  Please report it.");
-      return EOF;
-    }
-
-  return res;
-}
-
-static bool
-rec_parser_digit_p (char c)
-{
-  return ((c >= '0') && (c <= '9'));
-}
-
-static bool
-rec_parser_letter_p (char c)
-{
-  return (((c >= 'A') && (c <= 'Z'))
-          || ((c >= 'a') && (c <= 'z')));
-}
-
-static bool
-rec_expect (rec_parser_t parser,
-            const char *str)
-{
-  size_t str_size;
-  size_t counter;
-  bool found;
-  int ci;
-  char c;
-
-  found = true;
-  str_size = strlen (str);
-
-  for (counter = 0;
-       counter < str_size;
-       counter++)
-    {
-      ci = rec_parser_getc (parser);
-      if (ci == EOF)
-        {
-          /* EOF */
-          found = false;
-          parser->eof = true;
-          break;
-        }
-      else
-        {
-          c = (char) ci;
-          if (c != str[counter])
-            {
-              /* Not match */
-              rec_parser_ungetc (parser, ci);
-              found = false;
-              break;
-            }
-        }
-    }
-
-  return found;
-}
-
-static bool
-rec_parse_field_value (rec_parser_t parser,
-                       char **str)
-{
-  bool ret;
-  int ci, ci2;
-  char c, c2;
-  size_t str_size;
-  bool prev_newline;
-  rec_buf_t buf;
-
-  /* Sanity check */
-  if (rec_parser_eof (parser)
-      || rec_parser_error (parser))
-    return false;
-
-  c = '\0';
-  prev_newline = false;
-  ret = true;
-  buf = rec_buf_new (str, &str_size);
-  if (!buf)
-    {
-      /* Out of memory */
-      parser->error = REC_PARSER_ENOMEM;
-      return false;
-    }
-  
-  /* A field value is a sequence of zero or more ascii codes finished
-   * with a newline character.
-   *
-   *  \$ is translated to nothing.
-   *  $+ ? is translated to $.
-   */
-  while ((ci = rec_parser_getc (parser)) != EOF)
-    {
-      c = (char) ci;
-
-      if ((prev_newline) && (c != '+'))
-        {
-          /* End of value */
-          rec_parser_ungetc (parser, ci);
-          rec_buf_rewind (buf, 1);
-          break;
-        }
-
-      if (c == '\\')
-        {
-          ci2 = rec_parser_getc (parser);
-          if (ci2 == EOF)
-            {
-              parser->eof = true;
-              ret = false;
-              break;
-            }
-          else
-            {
-              c2 = (char) ci2;
-              if (c2 == '\n')
-                {
-                  /* Consume both $\n chars not adding them to str =>
-                     do nothing here. */
-                }
-              else
-                {
-                  /* Add \ and put back c2 */
-                  if (rec_buf_putc (c, buf) == EOF)
-                    {
-                      /* Out of memory */
-                      parser->error = REC_PARSER_ENOMEM;
-                      return false;
-                    }
-
-                  if (parser->error > 0)
-                    {
-                      break;
-                    }
-
-                  if (rec_parser_ungetc (parser, ci2)
-                      != ci2)
-                    {
-                      ret = false;
-                      break;
-                    }
-                }
-            }
-
-          prev_newline = false;
-        }
-      else if (c == '+')
-        {
-          if (prev_newline)
-            {
-              /* Reduce \n+ ? to \n by ignoring the + ? */
-              ci2 = rec_parser_getc (parser);
-              
-              if (ci2 == EOF)
-                {
-                  parser->eof = true;
-                  ret = false;
-                  break;
-                }
-              else
-                {
-                  c2 = (char) ci2;
-                  /* If the look ahead character is a blank, skip it.
-                     Otherwise put it back in the stream so it will be
-                     processed in the next iteration. */
-                  if (c2 != ' ')
-                    {
-                      if (rec_parser_ungetc (parser, ci2) != ci2)
-                        {
-                          ret = false;
-                          break;
-                        }
-                    }
-                }
-            }
-          else
-            {
-              if (rec_buf_putc (c, buf) == EOF)
-                {
-                  /* Out of memory */
-                  parser->error = REC_PARSER_ENOMEM;
-                  return false;
-                }
-
-              if (parser->error > 0)
-                break;
-            }
-
-          prev_newline = false;
-        }
-      else if (c == '\n')
-        {
-          if (rec_buf_putc (c, buf) == EOF)
-            {
-              /* Out of memory */
-              parser->error = REC_PARSER_ENOMEM;
-              return false;
-            }
-
-          if (parser->error > 0)
-            break;
-          prev_newline = true;
-        }
-      else
-        {
-          if (rec_buf_putc (c, buf) == EOF)
-            {
-              /* Out of memory */
-              parser->error = REC_PARSER_ENOMEM;
-              return false;
-            }
-
-          if (parser->error > 0)
-            break;
-          prev_newline = false;
-        }
-    }
-
-  if (ret)
-    {
-      if (rec_parser_eof (parser) && (c == '\n'))
-        /* Special case: field just before EOF */
-        rec_buf_rewind (buf, 1);
-    }
-
-  rec_buf_close (buf);
-
-  if (!ret)
-    free (*str);
-
-  return ret;
-}
-
-static bool
-rec_parse_comment (rec_parser_t parser, rec_comment_t *comment)
-{
-  bool ret;
-  rec_buf_t buf;
-  char *str;
-  size_t str_size;
-  int ci;
-  char c;
-
-  ret = false;
-  buf = rec_buf_new (&str, &str_size);
-
-  /* Comments start at the beginning of line and span until the first
-   * \n character not followed by a #, or EOF.
-   */
-  if (rec_expect (parser, "#"))
-    {
-      while ((ci = rec_parser_getc (parser)) != EOF)
-        {
-          c = (char) ci;
-
-          if (c == '\n')
-            {
-              if ((ci = rec_parser_getc (parser)) == EOF)
-                break;
-              c = (char) ci;
-
-              if (c != '#')
-                {
-                  rec_parser_ungetc (parser, ci);
-                  break;
-                }
-              else
-                c = '\n';
-            }
-
-          if (rec_buf_putc (c, buf) == EOF)
-            {
-              /* Out of memory */
-              parser->error = REC_PARSER_ENOMEM;
-              return false;
-            }
-        }
-      
-      ret = true;
-    }
-
-  rec_buf_close (buf);
-
-  if (ret)
-    *comment = rec_comment_new (str);
-  else
-    *comment = NULL;
-
-  free (str);
-  return ret;
-}
-
-static bool
-rec_parser_init_common (rec_parser_t parser,
-                        const char *source)
-{
-  if (source)
-    {
-      parser->source = strdup (source);
-      if (!parser->source)
-        return false;
-    }
-  else
-    parser->source = NULL;
-
-  parser->eof = false;
-  parser->error = REC_PARSER_NOERROR;
-  parser->line = 1;
-  parser->character = 0;
-  parser->prev_descriptor = NULL;
-  parser->p = parser->in_buffer;
-
-  return true;
-}
-
-/* End of rec-parser.c */

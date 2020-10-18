@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-buf.c
- *       Date:         Fri Dec 17 18:40:53 2010
- *
- *       GNU recutils - Flexible buffers.
- *
- */
+/* rec-buf.c - flexible buffers.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -147,5 +139,3 @@ rec_buf_puts (const char *str, rec_buf_t buf)
 
   return ret;
 }
-
-/* End of rec-buf.c */

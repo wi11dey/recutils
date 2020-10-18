@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-sex-parser.c
- *       Date:         Tue Jan 12 18:01:37 2010
- *
- *       GNU recutils - Sexy parser
- *
- */
+/* rec-sex-parser.c - Sexy parser.  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2010-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,10 +26,6 @@
 #include "rec-sex-tab.h"
 /*#include "rec-sex-lex.h" */
 
-/*
- * Data types
- */
-
 struct rec_sex_parser_s
 {
   char *in;              /* String to be parsed.  */
@@ -47,10 +35,6 @@ struct rec_sex_parser_s
 
   rec_sex_ast_t ast;
 };
-
-/*
- * Public functions
- */
 
 rec_sex_parser_t
 rec_sex_parser_new (void)
@@ -82,9 +66,7 @@ void
 rec_sex_parser_destroy (rec_sex_parser_t parser)
 {
   if (parser->scanner)
-    {
-      sexlex_destroy (parser->scanner);
-    }
+    sexlex_destroy (parser->scanner);
 
   free (parser->in);
   free (parser);
@@ -138,9 +120,7 @@ rec_sex_parser_getc (rec_sex_parser_t parser)
   res = -1;
   if ((parser->in)
       && (parser->index < strlen (parser->in)))
-    {
-      res = parser->in[parser->index++];
-    }
+    res = parser->in[parser->index++];
 
   return res;
 }
@@ -152,15 +132,12 @@ rec_sex_parser_run (rec_sex_parser_t parser,
   int res;
 
   rec_sex_parser_set_in (parser, expr);
+
   if (!sexparse (parser))
-    {
-      res = true;
-    }
+    res = true;
   else
-    {
-      /* Parse error.  */
-      res = false;
-    }
+    /* Parse error.  */
+    res = false;
 
   return res;
 }
@@ -170,5 +147,3 @@ rec_sex_parser_print_ast (rec_sex_parser_t parser)
 {
   rec_sex_ast_print (parser->ast);
 }
-
-/* End of rec-sex-parser.c */

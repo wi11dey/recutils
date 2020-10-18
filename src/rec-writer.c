@@ -1,14 +1,6 @@
-/* -*- mode: C -*-
- *
- *       File:         rec-writer.c
- *       Date:         Sat Dec 26 22:47:16 2009
- *
- *       GNU recutils - Writer
- *
- */
+/* rec-writer.c - Writer.  */
 
-/* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
- * 2018, 2019, 2020 Jose E. Marchesi */
+/* Copyright (C) 2009-2020 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,15 +26,6 @@
 #include <rec.h>
 #include <rec-utils.h>
 
-/*
- * Static functions defined in this file
- */
-static bool rec_writer_putc (rec_writer_t writer, char c);
-static bool rec_writer_puts (rec_writer_t writer, const char *s);
-
-/* Writer Data Structure
- *
- */
 struct rec_writer_s
 {
   FILE *file_out;    /* File stream used by the writer. */
@@ -74,6 +57,34 @@ rec_writer_new_common (rec_writer_t writer)
   writer->collapse_p = false;
   writer->skip_comments_p = false;
   writer->mode = REC_WRITER_NORMAL;
+}
+
+static bool
+rec_writer_putc (rec_writer_t writer, char c)
+{
+  bool ret;
+
+  ret = false;
+  if (writer->file_out)
+    ret = (fputc (c, writer->file_out) != EOF);
+  if (writer->buf_out)
+    ret = (rec_buf_putc (c, writer->buf_out) != EOF);
+
+  return ret;
+}
+
+static bool
+rec_writer_puts (rec_writer_t writer, const char *s)
+{
+  bool ret;
+
+  ret = false;
+  if (writer->file_out)
+    ret = (fputs (s, writer->file_out) != EOF);
+  if (writer->buf_out)
+    ret = (rec_buf_puts (s, writer->buf_out) != EOF);
+
+  return ret;
 }
 
 rec_writer_t
@@ -112,13 +123,9 @@ rec_writer_destroy (rec_writer_t writer)
   if (writer)
     {
       if (writer->file_out)
-        {
-          fflush (writer->file_out);
-        }
+        fflush (writer->file_out);
       if (writer->buf_out)
-        {
-          rec_buf_close (writer->buf_out);
-        }
+        rec_buf_close (writer->buf_out);
 
       free (writer);
     }
@@ -132,17 +139,13 @@ rec_write_comment (rec_writer_t writer,
   char *str;
   char *orig_str;
   size_t i;
-  
+
   if (writer->mode == REC_WRITER_SEXP)
     {
       if (!rec_writer_puts (writer, "(comment "))
-        {
-          return false;
-        }
+        return false;
       if (!rec_writer_putc (writer, '"'))
-        {
-          return false;
-        }
+        return false;
 
       str = rec_comment_text (comment);
       for (i = 0; i < strlen (str); i++)
@@ -150,23 +153,17 @@ rec_write_comment (rec_writer_t writer,
           if (str[i] == '\n')
             {
               if (!rec_writer_puts (writer, "\\n"))
-                {
-                  return false;
-                }
+                return false;
             }
           else
             {
               if (!rec_writer_putc (writer, str[i]))
-                {
-                  return false;
-                }
+                return false;
             }
         }
 
       if (!rec_writer_puts (writer, "\")"))
-        {
-          return false;
-        }
+        return false;
     }
   else
     {
@@ -175,7 +172,7 @@ rec_write_comment (rec_writer_t writer,
          newline characters.  */
 
       bool first = true;
-      
+
       str = strdup (rec_comment_text (comment));
       orig_str = str; /* Save a pointer to str to deallocate it later,
                          since strsep will modify the str
@@ -186,16 +183,12 @@ rec_write_comment (rec_writer_t writer,
           if (!first)
             {
               if (!rec_writer_putc (writer, '\n'))
-                {
-                  return false;
-                }
+                return false;
             }
 
-          if (!rec_writer_putc (writer, '#') 
+          if (!rec_writer_putc (writer, '#')
               || !rec_writer_puts (writer, line))
-            {
-              return false;
-            }
+            return false;
 
           first = false;
         }
@@ -219,40 +212,28 @@ rec_write_field (rec_writer_t writer,
   if (mode == REC_WRITER_SEXP)
     {
       if (!rec_writer_puts (writer, "(field "))
-        {
-          return false;
-        }
+        return false;
       if (!rec_writer_puts (writer, rec_field_char_location_str (field)))
-        {
-          return false;
-        }
+        return false;
       if (!rec_writer_putc (writer, ' '))
-        {
-          return false;
-        }
+        return false;
     }
 
   if ((mode != REC_WRITER_VALUES) && (mode != REC_WRITER_VALUES_ROW))
     {
       fname = rec_field_name (field);
       if (!rec_write_field_name (writer, fname))
-        {
-          return false;
-        }
+        return false;
     }
-  
+
   /* Write the field value */
   if (mode == REC_WRITER_SEXP)
     {
       if (!rec_writer_putc (writer, ' '))
-        {
-          return false;
-        }
-  
+        return false;
+
       if (!rec_writer_putc (writer, '"'))
-        {
-          return false;
-        }
+        return false;
     }
 
   fvalue = rec_field_value (field);
@@ -260,9 +241,7 @@ rec_write_field (rec_writer_t writer,
   if ((strlen (fvalue) > 0) && (mode == REC_WRITER_NORMAL))
     {
       if (!rec_writer_putc (writer, ' '))
-        {
-          return false;
-        }
+        return false;
     }
 
   for (pos = 0; pos < strlen (fvalue); pos++)
@@ -272,57 +251,43 @@ rec_write_field (rec_writer_t writer,
           if (mode == REC_WRITER_SEXP)
             {
               if (!rec_writer_puts (writer, "\\n"))
-                {
-                  return false;
-                }
+                return false;
             }
           else if (mode == REC_WRITER_NORMAL)
             {
               if (!rec_writer_puts (writer, "\n+ "))
-                {
-                  return false;
-                }
+                return false;
             }
           else
             {
               if (!rec_writer_putc (writer, '\n'))
-                {
-                  return false;
-                }
+                return false;
             }
         }
       else if (((fvalue[pos] == '"') || (fvalue[pos] == '\\')) && (mode == REC_WRITER_SEXP))
         {
           if ((!rec_writer_putc (writer, '\\'))
               || (!rec_writer_putc (writer, fvalue[pos])))
-            {
-              return false;
-            }
+            return false;
         }
       else
         {
           if (!rec_writer_putc (writer, fvalue[pos]))
-            {
-              /* EOF on output */
-              return false;
-            }
+            /* EOF on output */
+            return false;
         }
     }
 
   if (mode == REC_WRITER_SEXP)
     {
       if (!rec_writer_putc (writer, '"'))
-        {
-          return false;
-        }
+        return false;
     }
 
   if (mode == REC_WRITER_SEXP)
     {
       if (!rec_writer_puts (writer, ")"))
-        {
-          return false;
-        }
+        return false;
     }
 
   return true;
@@ -346,29 +311,21 @@ rec_write_field_name (rec_writer_t writer,
   if (mode == REC_WRITER_SEXP)
     {
       if (!rec_writer_putc (writer, '"'))
-        {
-          return false;
-        }
+        return false;
     }
 
   if (!rec_writer_puts (writer, field_name))
-    {
-      return false;
-    }
+    return false;
 
   if (mode == REC_WRITER_SEXP)
     {
       if (!rec_writer_putc (writer, '"'))
-        {
-          return false;
-        }
+        return false;
     }
   else
     {
       if (!rec_writer_putc (writer, ':'))
-        {
-          return false;
-        }
+        return false;
     }
 
   return true;
@@ -417,7 +374,7 @@ rec_write_record (rec_writer_t writer,
 
           /* Include a field separator.  */
 
-          if ((mode == REC_WRITER_VALUES_ROW) 
+          if ((mode == REC_WRITER_VALUES_ROW)
               && (num_field != (num_fields - 1)))
             {
               if(mode == REC_WRITER_VALUES_ROW)
@@ -465,9 +422,7 @@ rec_write_record (rec_writer_t writer,
   if (mode == REC_WRITER_SEXP)
     {
       if (!rec_writer_puts (writer, "))"))
-        {
-          return false;
-        }
+        return false;
     }
 
   return ret;
@@ -486,7 +441,7 @@ rec_write_rset (rec_writer_t writer,
   rec_mset_elem_t elem;
   void *data;
   enum rec_writer_mode_e mode = writer->mode;
-  
+
   ret = true;
   wrote_descriptor = false;
   position = 0;
@@ -510,53 +465,39 @@ rec_write_rset (rec_writer_t writer,
       if (position != 0)
         {
           if (!rec_writer_putc (writer, '\n'))
-            {
-              ret = false;
-            }
+            ret = false;
         }
 
       if (position == descriptor_pos)
         {
-          if (descriptor 
+          if (descriptor
               && (!(wrote_descriptor = rec_write_record (writer,
                                                          rec_rset_descriptor (rset)))))
-            {
-              ret = false;
-            }
+            ret = false;
           else
             {
               if (wrote_descriptor)
                 {
                   if (!rec_writer_puts (writer, "\n\n"))
-                    {
-                      ret = false;
-                    }
+                    ret = false;
                 }
             }
         }
-      
+
       if (rec_mset_elem_type (elem) == MSET_RECORD)
-        {
-          ret = rec_write_record (writer, (rec_record_t) data);
-        }
+        ret = rec_write_record (writer, (rec_record_t) data);
       else if (!writer->skip_comments_p)
-        {
-          ret = rec_write_comment (writer, (rec_comment_t) data);
-        }
+        ret = rec_write_comment (writer, (rec_comment_t) data);
 
       if (!writer->collapse_p || (position == (rec_rset_num_elems (rset) - 1)))
         {
           if (!rec_writer_putc (writer, '\n'))
-            {
-              ret = false;
-            }
+            ret = false;
         }
-      
+
       if (!ret)
-        {
-          break;
-        }
-      
+        break;
+
       position++;
     }
 
@@ -565,7 +506,7 @@ rec_write_rset (rec_writer_t writer,
   /* Special case:
    *
    * # comment 1
-   * 
+   *
    * # comment 2
    * ...
    * %rec: foo
@@ -575,17 +516,11 @@ rec_write_rset (rec_writer_t writer,
       && rec_rset_descriptor (rset))
     {
       if (!rec_writer_putc (writer, '\n'))
-        {
-          ret = false;
-        }
+        ret = false;
       if (!rec_write_record (writer, rec_rset_descriptor (rset)))
-        {
-          ret = false;
-        }
+        ret = false;
       if (!rec_writer_putc (writer, '\n'))
-        {
-          ret = false;
-        }
+        ret = false;
     }
 
   return ret;
@@ -611,7 +546,7 @@ rec_write_db (rec_writer_t writer,
               break;
             }
         }
-      
+
       if (!rec_write_rset (writer, rset))
         {
           ret = false;
@@ -629,7 +564,7 @@ rec_write_field_str (rec_field_t field,
   rec_writer_t writer;
   char *result;
   size_t result_size;
-  
+
   result = NULL;
   writer = rec_writer_new_str (&result, &result_size);
   if (writer)
@@ -638,7 +573,7 @@ rec_write_field_str (rec_field_t field,
       rec_write_field (writer, field);
       rec_writer_destroy (writer);
     }
-  
+
   return result;
 }
 
@@ -649,7 +584,7 @@ rec_write_field_name_str (const char *field_name,
   rec_writer_t writer;
   char *result;
   size_t result_size;
-  
+
   result = NULL;
   writer = rec_writer_new_str (&result, &result_size);
   if (writer)
@@ -658,7 +593,7 @@ rec_write_field_name_str (const char *field_name,
       rec_write_field_name (writer, field_name);
       rec_writer_destroy (writer);
     }
-  
+
   return result;
 }
 
@@ -669,7 +604,7 @@ rec_write_comment_str (rec_comment_t comment,
   rec_writer_t writer;
   char *result;
   size_t result_size;
-  
+
   result = NULL;
   writer = rec_writer_new_str (&result, &result_size);
   if (writer)
@@ -678,7 +613,7 @@ rec_write_comment_str (rec_comment_t comment,
       rec_write_comment (writer, comment);
       rec_writer_destroy (writer);
     }
-  
+
   return result;
 }
 
@@ -709,45 +644,3 @@ rec_writer_set_mode (rec_writer_t writer,
 {
   writer->mode = mode;
 }
-
-/*
- * Private functions
- */
-
-static bool
-rec_writer_putc (rec_writer_t writer, char c)
-{
-  bool ret;
-
-  ret = false;
-  if (writer->file_out)
-    {
-      ret = (fputc (c, writer->file_out) != EOF);
-    }
-  if (writer->buf_out)
-    {
-      ret = (rec_buf_putc (c, writer->buf_out) != EOF);
-    }
-
-  return ret;
-}
-
-static bool
-rec_writer_puts (rec_writer_t writer, const char *s)
-{
-  bool ret;
-
-  ret = false;
-  if (writer->file_out)
-    {
-      ret = (fputs (s, writer->file_out) != EOF);
-    }
-  if (writer->buf_out)
-    {
-      ret = (rec_buf_puts (s, writer->buf_out) != EOF);
-    }
-
-  return ret;
-}
-
-/* End of rec-writer.c */
