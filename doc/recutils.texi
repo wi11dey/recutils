@@ -5050,7 +5050,7 @@ the records.
 @itemx --type=@var{type}
 Select records of a given type only.
 @item -j @var{field}
-@itemx --field=@var{field}
+@itemx --join=@var{field}
 Perform an inner join of the record set selected by @option{-t} and
 the record set for which @var{field} is a foreign key.  @var{field}
 must be a field declared with type @code{rec} and thus must be a

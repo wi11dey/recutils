@@ -1,3 +1,7 @@
+2020-11-06  John Soo  <jsoo1@asu.edu>
+
+	* doc/recutils.texi: Fix long option name for -j/--join.
+
 2020-10-18  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/rec.c: Simplify code.
