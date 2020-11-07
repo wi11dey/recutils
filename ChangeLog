@@ -1,3 +1,8 @@
+2020-11-07  Antoine Kalmbach  <ane@iki.fi>
+
+	* etc/rec-mode.el (rec-summary-fields): split by comma and space
+	(rec-cmd-show-summary): split minibuffer input
+
 2020-11-06  John Soo  <jsoo1@asu.edu>
 
 	* doc/recutils.texi: Fix long option name for -j/--join.
