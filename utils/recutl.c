@@ -438,7 +438,7 @@ recutl_read_file (char *file_name)
   if (in)
     {
       size_t file_size;
-      result = fread_file (in, &file_size);
+      result = fread_file (in, 0, &file_size);
       fclose (in);
     }
 

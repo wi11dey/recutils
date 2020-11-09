@@ -1,3 +1,8 @@
+2020-11-09  Antoine Kalmbach  <ane@iki.fi>
+
+	* utils/recutl.c (recutl_read_file): Update to latest signature
+	from gnulib
+
 2020-11-07  Antoine Kalmbach  <ane@iki.fi>
 
 	* etc/rec-mode.el (rec-summary-fields): split by comma and space
