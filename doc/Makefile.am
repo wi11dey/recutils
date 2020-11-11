@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-info_TEXINFOS = recutils.texi rec-mode.texi
+info_TEXINFOS = recutils.texi
 recutils_TEXINFOS = parse-datetime.texi fdl.texi
 
 # End of Makefile.am

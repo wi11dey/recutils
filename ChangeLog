@@ -1,3 +1,12 @@
+2020-11-11  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* etc/rec-mode.el: Delete.
+	* etc/ob-rec.el: Likewise.
+	* etc/Makefile.am (dist_lisp_DATA): Remove.
+	* doc/rec-mode.texi: Delete.
+	* doc/Makefile.am (info_TEXINFOS): Remove rec-mode.texi.
+	* m4/pkg.m4: New file.
+
 2020-11-09  Antoine Kalmbach  <ane@iki.fi>
 
 	* utils/recutl.c (recutl_read_file): Update to latest signature
