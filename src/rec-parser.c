@@ -1012,7 +1012,7 @@ rec_parse_db (rec_parser_t parser,
         }
     }
 
-  if (!rec_parser_eof (parser))
+  if (parser->error != REC_PARSER_NOERROR)
     ret = false;
 
   if (ret)
