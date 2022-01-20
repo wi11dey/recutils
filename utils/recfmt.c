@@ -174,7 +174,7 @@ recfmt_apply_template (rec_record_t record,
      slot with the empty string.
   */
 
-  if (regcomp (&regexp, "\\{\\{" "[^}]*" "\\}\\}", REG_EXTENDED) != 0)
+  if (regcomp (&regexp, "\\{\\{" "[^{}]*" "\\}\\}", REG_EXTENDED) != 0)
     recutl_fatal (_("recfmt_apply_template: error compiling regexp.\
  Please report this.\n"));
 

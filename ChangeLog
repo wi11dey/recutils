@@ -1,3 +1,9 @@
+2022-01-20  Liliana Marie Prikler  <liliana.prikler@ist.tugraz.at>
+
+	* utils/recfmt.c (recfmt_apply_template): Add open brace as excluded
+	character in regexp.
+	* torture/utils/recfmt.sh (recfmt-curly): New test.
+
 2020-11-18  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/rec-parser.c (rec_parse_db): Fix error reporting.

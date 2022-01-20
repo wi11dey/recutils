@@ -127,6 +127,17 @@ value21 value22value23
 value31 value32value33
 '
 
+# Apply a template containing curly-brace markup.
+test_tool recfmt-curly ok \
+          recfmt \
+          '"\def\field1{{{field1}}}
+"' \
+          multiple-records \
+'\def\field1{value11}
+\def\field1{value21}
+\def\field1{value31}
+'
+
 # Try to apply an empty slot.
 test_tool recfmt-empty-slot xfail \
           recfmt \
