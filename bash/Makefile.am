@@ -1,7 +1,7 @@
 # bash/Makefile.am
 # GNU recutils
 
-# Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2020 Jose E.
+# Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2020, 2022 Jose E.
 # Marchesi
 
 # This program is free software: you can redistribute it and/or modify

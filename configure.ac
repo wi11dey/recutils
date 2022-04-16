@@ -3,8 +3,7 @@ dnl
 dnl Please process this file with autoconf to get a 'configure'
 dnl script.
 
-dnl Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
-dnl 2018, 2019, 2020 Jose E. Marchesi
+dnl Copyright (C) 2009-2022 Jose E. Marchesi
 
 dnl This program is free software: you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by

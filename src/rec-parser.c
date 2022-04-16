@@ -1,6 +1,7 @@
 /* rec-parser.c - Parsing routines.  */
 
-/* Copyright (C) 2009-2020 Jose E. Marchesi */
+/* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+ * 2018, 2019, 2020, 2022 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

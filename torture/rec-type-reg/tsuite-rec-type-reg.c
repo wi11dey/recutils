@@ -1,4 +1,4 @@
-/* -*- mode: C -*- Time-stamp: "2015-04-27 20:12:44 jemarch"
+/* -*- mode: C -*- Time-stamp: "2022-04-16 17:35:10 jemarch"
  *
  *       File:         tsuite-rec-type-reg.c
  *       Date:         Fri Oct 29 20:58:54 2010
@@ -7,8 +7,7 @@
  *
  */
 
-/* Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2020 Jose E.
- * Marchesi */
+/* Copyright (C) 2010-2022 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

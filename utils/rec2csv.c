@@ -1,6 +1,6 @@
 /* rec2csv.c - rec to csv converter.  */
 
-/* Copyright (C) 2011-2020 Jose E. Marchesi */
+/* Copyright (C) 2011-2022 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
