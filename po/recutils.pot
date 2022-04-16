@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU recutils 1.8.90\n"
 "Report-Msgid-Bugs-To: bug-gnu-utils@gnu.org\n"
-"POT-Creation-Date: 2020-11-11 11:50+0100\n"
+"POT-Creation-Date: 2022-04-16 13:20+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -766,130 +766,135 @@ msgstr ""
 msgid "%s:%s: error: duplicated key value in field '%s' in record\n"
 msgstr ""
 
-#: src/rec-int.c:536
+#: src/rec-int.c:561
+#, c-format
+msgid "%s:%s: error: duplicated value in singular field '%s' in record\n"
+msgstr ""
+
+#: src/rec-int.c:619
 #, c-format
 msgid "%s:%s: error: missing %%rec field in record descriptor\n"
 msgstr ""
 
-#: src/rec-int.c:544
+#: src/rec-int.c:627
 #, c-format
 msgid "%s:%s: error: too many %%rec fields in record descriptor\n"
 msgstr ""
 
-#: src/rec-int.c:554
+#: src/rec-int.c:637
 #, c-format
 msgid "%s:%s: error: invalid record type %s\n"
 msgstr ""
 
-#: src/rec-int.c:565
+#: src/rec-int.c:648
 #, c-format
 msgid "%s:%s: error: only one %%key field is allowed in a record descriptor\n"
 msgstr ""
 
-#: src/rec-int.c:575
+#: src/rec-int.c:658
 #, c-format
 msgid "%s:%s: error: only one %%size field is allowed in a record descriptor\n"
 msgstr ""
 
-#: src/rec-int.c:585
+#: src/rec-int.c:668
 #, c-format
 msgid "%s:%s: error: only one %%sort field is allowed in a record descriptor\n"
 msgstr ""
 
-#: src/rec-int.c:608
+#: src/rec-int.c:691
 #, c-format
 msgid ""
 "%s:%s: error: expected a comma-separated list of fields before the type "
 "specification\n"
 msgstr ""
 
-#: src/rec-int.c:634 src/rec-int.c:687
+#: src/rec-int.c:717 src/rec-int.c:770
 #, c-format
 msgid "%s:%s: error: the referred type %s does not exist\n"
 msgstr ""
 
-#: src/rec-int.c:646
+#: src/rec-int.c:729
 #, c-format
 msgid "%s:%s: error: invalid type specification\n"
 msgstr ""
 
-#: src/rec-int.c:661
+#: src/rec-int.c:744
 #, c-format
 msgid "%s:%s: error: expected a type name before the type specification\n"
 msgstr ""
 
-#: src/rec-int.c:699
+#: src/rec-int.c:782
 #, c-format
 msgid "%s:%s: error: invalid typedef specification\n"
 msgstr ""
 
-#: src/rec-int.c:721
+#: src/rec-int.c:804
 #, c-format
 msgid "%s:%s: error: value for %s[%zd] is not a valid selection expression\n"
 msgstr ""
 
-#: src/rec-int.c:752
+#: src/rec-int.c:835
 #, c-format
 msgid "%s:%s: error: value for %s[%zd] is not a list of field names\n"
 msgstr ""
 
-#: src/rec-int.c:765
+#: src/rec-int.c:848
 #, c-format
 msgid ""
 "%s:%s: error: value for %s should be a number optionally preceded by >, <, "
 ">= or <=.\n"
 msgstr ""
 
-#: src/rec-int.c:781
+#: src/rec-int.c:864
 #, c-format
 msgid "%s:%s: error: value for %s should be a list of field names.\n"
 msgstr ""
 
-#: src/rec-int.c:809
+#: src/rec-int.c:892
 #, c-format
 msgid ""
 "%s:%s: error: auto-incremented field %s should be of type int, range, uuid "
 "or date\n"
 msgstr ""
 
-#: src/rec-int.c:811
+#: src/rec-int.c:894
 #, c-format
 msgid ""
 "%s:%s: error: auto-incremented field %s should be of type int, range or "
 "date\n"
 msgstr ""
 
-#: src/rec-int.c:894
+#: src/rec-int.c:977
 #, c-format
 msgid "%s:%s: error: could not fetch remote descriptor from url %s.\n"
 msgstr ""
 
-#: src/rec-int.c:913
+#: src/rec-int.c:996
 #, c-format
 msgid "%s:%s: error: could not read external descriptor from file %s.\n"
 msgstr ""
 
-#: src/rec-int.c:928
+#: src/rec-int.c:1011
 #, c-format
 msgid "%s:%s: error: %s does not contain valid rec data.\n"
 msgstr ""
 
-#: src/rec-int.c:942
+#: src/rec-int.c:1025
 #, c-format
 msgid "%s:%s: error: %s does not contain information for type %s.\n"
 msgstr ""
 
-#: src/rec-int.c:1066
+#: src/rec-int.c:1149
 #, c-format
 msgid "%s: error: the number of records of type %s should be %zd.\n"
 msgstr ""
 
-#: src/rec-int.c:1076
+#: src/rec-int.c:1159
 #, c-format
 msgid "%s: error: too many records of type %s. Maximum allowed are %zd.\n"
 msgstr ""
 
-#: src/rec-int.c:1083
+#: src/rec-int.c:1166
 #, c-format
 msgid "%s: error: too few records of type %s. Minimum allowed are %zd.\n"
 msgstr ""
