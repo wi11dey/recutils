@@ -1,5 +1,9 @@
 2022-04-16  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* configure.ac: Bump version to 1.9.
+
+2022-04-16  Jose E. Marchesi  <jemarch@gnu.org>
+
 	CVE-2021-46019
 	CVE-2021-46022
 	CVE-2021-46022

@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: GNU recutils 1.8.90\n"
+"Project-Id-Version: GNU recutils 1.9\n"
 "Report-Msgid-Bugs-To: bug-gnu-utils@gnu.org\n"
-"POT-Creation-Date: 2022-04-16 13:20+0200\n"
+"POT-Creation-Date: 2022-04-16 19:38+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,8 +55,7 @@ msgstr ""
 msgid "Unknown system error"
 msgstr ""
 
-#: lib/execute.c:185 lib/execute.c:258 lib/wait-process.c:290
-#: lib/wait-process.c:364
+#: lib/execute.c:348 lib/wait-process.c:291 lib/wait-process.c:365
 #, c-format
 msgid "%s subprocess failed"
 msgstr ""
@@ -96,345 +95,355 @@ msgstr ""
 msgid "%s: option requires an argument -- '%c'\n"
 msgstr ""
 
-#: lib/obstack.c:338 lib/obstack.c:340 lib/xalloc-die.c:34
+#: lib/obstack.c:337 lib/obstack.c:339 lib/xalloc-die.c:34
 msgid "memory exhausted"
 msgstr ""
 
-#: parse-datetime.y:428 parse-datetime.y:528
+#: lib/openat-die.c:38
+#, c-format
+msgid "unable to record current working directory"
+msgstr ""
+
+#: lib/openat-die.c:57
+#, c-format
+msgid "failed to return to initial working directory"
+msgstr ""
+
+#: parse-datetime.y:440 parse-datetime.y:540
 #, c-format
 msgid "parsed %s part: "
 msgstr ""
 
-#: parse-datetime.y:443
+#: parse-datetime.y:455
 #, c-format
 msgid "year: %04<PRIdMAX>"
 msgstr ""
 
-#: parse-datetime.y:471
+#: parse-datetime.y:483
 #, c-format
 msgid "%s (day ordinal=%<PRIdMAX> number=%d)"
 msgstr ""
 
-#: parse-datetime.y:502
+#: parse-datetime.y:514
 #, c-format
 msgid "number of seconds: %<PRIdMAX>"
 msgstr ""
 
-#: parse-datetime.y:535
+#: parse-datetime.y:547
 msgid "today/this/now\n"
 msgstr ""
 
-#: parse-datetime.y:600
+#: parse-datetime.y:612
 msgid "number of seconds"
 msgstr ""
 
-#: parse-datetime.y:613
+#: parse-datetime.y:625
 msgid "datetime"
 msgstr ""
 
-#: parse-datetime.y:618
+#: parse-datetime.y:630
 msgid "time"
 msgstr ""
 
-#: parse-datetime.y:623
+#: parse-datetime.y:635
 msgid "local_zone"
 msgstr ""
 
-#: parse-datetime.y:628
+#: parse-datetime.y:640
 msgid "zone"
 msgstr ""
 
-#: parse-datetime.y:633
+#: parse-datetime.y:645
 msgid "date"
 msgstr ""
 
-#: parse-datetime.y:638
+#: parse-datetime.y:650
 msgid "day"
 msgstr ""
 
-#: parse-datetime.y:642 parse-datetime.y:749 parse-datetime.y:754
+#: parse-datetime.y:654 parse-datetime.y:761 parse-datetime.y:766
 msgid "relative"
 msgstr ""
 
-#: parse-datetime.y:646
+#: parse-datetime.y:658
 msgid "number"
 msgstr ""
 
-#: parse-datetime.y:650
+#: parse-datetime.y:662
 msgid "hybrid"
 msgstr ""
 
-#: parse-datetime.y:808
+#: parse-datetime.y:820
 #, c-format
 msgid "warning: value %<PRIdMAX> has %<PRIdMAX> digits. Assuming YYYY/MM/DD\n"
 msgstr ""
 
-#: parse-datetime.y:820
+#: parse-datetime.y:832
 #, c-format
 msgid ""
 "warning: value %<PRIdMAX> has less than 4 digits. Assuming MM/DD/YY[YY]\n"
 msgstr ""
 
-#: parse-datetime.y:1267
+#: parse-datetime.y:1279
 #, c-format
 msgid "warning: adjusting year value %<PRIdMAX> to %<PRIdMAX>\n"
 msgstr ""
 
-#: parse-datetime.y:1277
+#: parse-datetime.y:1289
 #, c-format
 msgid "error: out-of-range year %<PRIdMAX>\n"
 msgstr ""
 
-#: parse-datetime.y:1515
+#: parse-datetime.y:1520
 #, c-format
 msgid "error: unknown word '%s'\n"
 msgstr ""
 
-#: parse-datetime.y:1664
+#: parse-datetime.y:1669
 msgid "error: invalid date/time value:\n"
 msgstr ""
 
-#: parse-datetime.y:1665
+#: parse-datetime.y:1670
 #, c-format
 msgid "    user provided time: '%s'\n"
 msgstr ""
 
-#: parse-datetime.y:1667
+#: parse-datetime.y:1672
 #, c-format
 msgid "       normalized time: '%s'\n"
 msgstr ""
 
-#: parse-datetime.y:1690
+#: parse-datetime.y:1695
 msgid "     possible reasons:\n"
 msgstr ""
 
-#: parse-datetime.y:1692
+#: parse-datetime.y:1697
 msgid "       non-existing due to daylight-saving time;\n"
 msgstr ""
 
-#: parse-datetime.y:1694
+#: parse-datetime.y:1699
 msgid "       invalid day/month combination;\n"
 msgstr ""
 
-#: parse-datetime.y:1695
+#: parse-datetime.y:1700
 msgid "       numeric values overflow;\n"
 msgstr ""
 
-#: parse-datetime.y:1696
+#: parse-datetime.y:1701
 msgid "incorrect timezone"
 msgstr ""
 
-#: parse-datetime.y:1697
+#: parse-datetime.y:1702
 msgid "missing timezone"
 msgstr ""
 
-#: parse-datetime.y:1817
+#: parse-datetime.y:1810
 msgid "error: initial year out of range\n"
 msgstr ""
 
-#: parse-datetime.y:1914
+#: parse-datetime.y:1905
 msgid "error: parsing failed\n"
 msgstr ""
 
-#: parse-datetime.y:1915
+#: parse-datetime.y:1906
 #, c-format
 msgid "error: parsing failed, stopped at '%s'\n"
 msgstr ""
 
-#: parse-datetime.y:1925
+#: parse-datetime.y:1916
 msgid "input timezone: "
 msgstr ""
 
-#: parse-datetime.y:1928
+#: parse-datetime.y:1919
 #, c-format
 msgid "'@timespec' - always UTC"
 msgstr ""
 
-#: parse-datetime.y:1930
+#: parse-datetime.y:1921
 #, c-format
 msgid "parsed date/time string"
 msgstr ""
 
-#: parse-datetime.y:1934
+#: parse-datetime.y:1925
 #, c-format
 msgid "TZ=\"%s\" in date string"
 msgstr ""
 
-#: parse-datetime.y:1938
+#: parse-datetime.y:1929
 #, c-format
 msgid "TZ=\"UTC0\" environment value or -u"
 msgstr ""
 
-#: parse-datetime.y:1941
+#: parse-datetime.y:1932
 #, c-format
 msgid "TZ=\"%s\" environment value"
 msgstr ""
 
-#: parse-datetime.y:1944
+#: parse-datetime.y:1935
 #, c-format
 msgid "system default"
 msgstr ""
 
-#: parse-datetime.y:1986
+#: parse-datetime.y:1977
 msgid "error: year, month, or day overflow\n"
 msgstr ""
 
-#: parse-datetime.y:1997
+#: parse-datetime.y:1988
 #, c-format
 msgid "error: invalid hour %<PRIdMAX>%s\n"
 msgstr ""
 
-#: parse-datetime.y:2005
+#: parse-datetime.y:1996
 #, c-format
 msgid "using specified time as starting value: '%s'\n"
 msgstr ""
 
-#: parse-datetime.y:2006
+#: parse-datetime.y:1997
 #, c-format
 msgid "using current time as starting value: '%s'\n"
 msgstr ""
 
-#: parse-datetime.y:2060
+#: parse-datetime.y:2051
 #, c-format
 msgid "error: tzalloc (\"%s\") failed\n"
 msgstr ""
 
-#: parse-datetime.y:2105
+#: parse-datetime.y:2095
 #, c-format
 msgid ""
 "error: day '%s' (day ordinal=%<PRIdMAX> number=%d) resulted in an invalid "
 "date: '%s'\n"
 msgstr ""
 
-#: parse-datetime.y:2116
+#: parse-datetime.y:2106
 #, c-format
 msgid "new start date: '%s' is '%s'\n"
 msgstr ""
 
-#: parse-datetime.y:2125
+#: parse-datetime.y:2115
 #, c-format
 msgid "using current date as starting value: '%s'\n"
 msgstr ""
 
-#: parse-datetime.y:2129
+#: parse-datetime.y:2119
 #, c-format
 msgid "warning: day (%s) ignored when explicit dates are given\n"
 msgstr ""
 
-#: parse-datetime.y:2133
+#: parse-datetime.y:2123
 #, c-format
 msgid "starting date/time: '%s'\n"
 msgstr ""
 
-#: parse-datetime.y:2143
+#: parse-datetime.y:2133
 msgid ""
 "warning: when adding relative months/years, it is recommended to specify the "
 "15th of the months\n"
 msgstr ""
 
-#: parse-datetime.y:2148
+#: parse-datetime.y:2138
 msgid "warning: when adding relative days, it is recommended to specify noon\n"
 msgstr ""
 
-#: parse-datetime.y:2158
+#: parse-datetime.y:2148
 #, c-format
 msgid "error: %s:%d\n"
 msgstr ""
 
-#: parse-datetime.y:2172
+#: parse-datetime.y:2163
 #, c-format
 msgid "error: adding relative date resulted in an invalid date: '%s'\n"
 msgstr ""
 
-#: parse-datetime.y:2181
+#: parse-datetime.y:2172
 #, c-format
 msgid ""
 "after date adjustment (%+<PRIdMAX> years, %+<PRIdMAX> months, %+<PRIdMAX> "
 "days),\n"
 msgstr ""
 
-#: parse-datetime.y:2185
+#: parse-datetime.y:2176
 #, c-format
 msgid "    new date/time = '%s'\n"
 msgstr ""
 
-#: parse-datetime.y:2204
+#: parse-datetime.y:2195
 msgid "warning: daylight saving time changed after date adjustment\n"
 msgstr ""
 
-#: parse-datetime.y:2223
+#: parse-datetime.y:2214
 msgid "warning: month/year adjustment resulted in shifted dates:\n"
 msgstr ""
 
-#: parse-datetime.y:2226
+#: parse-datetime.y:2217
 #, c-format
 msgid "     adjusted Y M D: %s %02d %02d\n"
 msgstr ""
 
-#: parse-datetime.y:2228
+#: parse-datetime.y:2219
 #, c-format
 msgid "   normalized Y M D: %s %02d %02d\n"
 msgstr ""
 
-#: parse-datetime.y:2256
+#: parse-datetime.y:2248
 #, c-format
 msgid "error: timezone %d caused time_t overflow\n"
 msgstr ""
 
-#: parse-datetime.y:2266
+#: parse-datetime.y:2258
 #, c-format
 msgid "'%s' = %<PRIdMAX> epoch-seconds\n"
 msgstr ""
 
-#: parse-datetime.y:2294
+#: parse-datetime.y:2286
 msgid "error: adding relative time caused an overflow\n"
 msgstr ""
 
-#: parse-datetime.y:2305
+#: parse-datetime.y:2297
 #, c-format
 msgid ""
 "after time adjustment (%+<PRIdMAX> hours, %+<PRIdMAX> minutes, %+<PRIdMAX> "
 "seconds, %+d ns),\n"
 msgstr ""
 
-#: parse-datetime.y:2310
+#: parse-datetime.y:2303
 #, c-format
 msgid "    new time = %<PRIdMAX> epoch-seconds\n"
 msgstr ""
 
-#: parse-datetime.y:2326
+#: parse-datetime.y:2319
 msgid "warning: daylight saving time changed after time adjustment\n"
 msgstr ""
 
-#: parse-datetime.y:2336
+#: parse-datetime.y:2329
 msgid "timezone: system default\n"
 msgstr ""
 
-#: parse-datetime.y:2338
+#: parse-datetime.y:2331
 msgid "timezone: Universal Time\n"
 msgstr ""
 
-#: parse-datetime.y:2340
+#: parse-datetime.y:2333
 #, c-format
 msgid "timezone: TZ=\"%s\" environment value\n"
 msgstr ""
 
-#: parse-datetime.y:2344
+#: parse-datetime.y:2337
 #, c-format
 msgid "final: %<PRIdMAX>.%09d (epoch-seconds)\n"
 msgstr ""
 
-#: parse-datetime.y:2350
+#: parse-datetime.y:2343
 #, c-format
 msgid "final: %s (UTC)\n"
 msgstr ""
 
-#: parse-datetime.y:2365
+#: parse-datetime.y:2358
 #, c-format
 msgid "final: %s (UTC%s)\n"
 msgstr ""
 
-#: parse-datetime.y:2369
+#: parse-datetime.y:2362
 #, c-format
 msgid "final: %s (unknown time zone offset)\n"
 msgstr ""
@@ -468,75 +477,75 @@ msgstr ""
 msgid "'"
 msgstr ""
 
-#: lib/regcomp.c:135
+#: lib/regcomp.c:122
 msgid "Success"
 msgstr ""
 
-#: lib/regcomp.c:138
+#: lib/regcomp.c:125
 msgid "No match"
 msgstr ""
 
-#: lib/regcomp.c:141
+#: lib/regcomp.c:128
 msgid "Invalid regular expression"
 msgstr ""
 
-#: lib/regcomp.c:144
+#: lib/regcomp.c:131
 msgid "Invalid collation character"
 msgstr ""
 
-#: lib/regcomp.c:147
+#: lib/regcomp.c:134
 msgid "Invalid character class name"
 msgstr ""
 
-#: lib/regcomp.c:150
+#: lib/regcomp.c:137
 msgid "Trailing backslash"
 msgstr ""
 
-#: lib/regcomp.c:153
+#: lib/regcomp.c:140
 msgid "Invalid back reference"
 msgstr ""
 
-#: lib/regcomp.c:156
+#: lib/regcomp.c:143
 msgid "Unmatched [, [^, [:, [., or [="
 msgstr ""
 
-#: lib/regcomp.c:159
+#: lib/regcomp.c:146
 msgid "Unmatched ( or \\("
 msgstr ""
 
-#: lib/regcomp.c:162
+#: lib/regcomp.c:149
 msgid "Unmatched \\{"
 msgstr ""
 
-#: lib/regcomp.c:165
+#: lib/regcomp.c:152
 msgid "Invalid content of \\{\\}"
 msgstr ""
 
-#: lib/regcomp.c:168
+#: lib/regcomp.c:155
 msgid "Invalid range end"
 msgstr ""
 
-#: lib/regcomp.c:171
+#: lib/regcomp.c:158
 msgid "Memory exhausted"
 msgstr ""
 
-#: lib/regcomp.c:174
+#: lib/regcomp.c:161
 msgid "Invalid preceding regular expression"
 msgstr ""
 
-#: lib/regcomp.c:177
+#: lib/regcomp.c:164
 msgid "Premature end of regular expression"
 msgstr ""
 
-#: lib/regcomp.c:180
+#: lib/regcomp.c:167
 msgid "Regular expression too big"
 msgstr ""
 
-#: lib/regcomp.c:183
+#: lib/regcomp.c:170
 msgid "Unmatched ) or \\)"
 msgstr ""
 
-#: lib/regcomp.c:676
+#: lib/regcomp.c:650
 msgid "No previous regular expression"
 msgstr ""
 
@@ -691,286 +700,276 @@ msgstr ""
 msgid "General help using GNU software: <%s>\n"
 msgstr ""
 
-#: lib/w32spawn.h:49
-#, c-format
-msgid "_open_osfhandle failed"
-msgstr ""
-
-#: lib/w32spawn.h:90
-#, c-format
-msgid "cannot restore fd %d: dup2 failed"
-msgstr ""
-
-#: lib/wait-process.c:231 lib/wait-process.c:263 lib/wait-process.c:325
+#: lib/wait-process.c:232 lib/wait-process.c:264 lib/wait-process.c:326
 #, c-format
 msgid "%s subprocess"
 msgstr ""
 
-#: lib/wait-process.c:282 lib/wait-process.c:354
+#: lib/wait-process.c:283 lib/wait-process.c:355
 #, c-format
 msgid "%s subprocess got fatal signal %d"
 msgstr ""
 
-#: src/rec-fex.c:725
+#: src/rec-fex.c:726
 #, c-format
 msgid "internal error: REC_FEX_MAX_ELEMS exceeded.  Please report this.\n"
 msgstr ""
 
-#: src/rec-int.c:131 src/rec-int.c:185 src/rec-int.c:242 src/rec-int.c:286
+#: src/rec-int.c:132 src/rec-int.c:186 src/rec-int.c:243 src/rec-int.c:287
 #: utils/recutl.c:199
 msgid "out of memory\n"
 msgstr ""
 
-#: src/rec-int.c:146
+#: src/rec-int.c:147
 #, c-format
 msgid "%s:%s: error: mandatory field '%s' not found in record\n"
 msgstr ""
 
-#: src/rec-int.c:209
+#: src/rec-int.c:210
 #, c-format
 msgid "%s:%s: error: field '%s' not allowed in this record set\n"
 msgstr ""
 
-#: src/rec-int.c:256
+#: src/rec-int.c:257
 #, c-format
 msgid "%s:%s: error: field '%s' should be unique in this record\n"
 msgstr ""
 
-#: src/rec-int.c:300
+#: src/rec-int.c:301
 #, c-format
 msgid "%s:%s: error: prohibited field '%s' found in record\n"
 msgstr ""
 
-#: src/rec-int.c:332
+#: src/rec-int.c:333
 #, c-format
 msgid "%s:%s: error: %%constraint[%d] violated in record\n"
 msgstr ""
 
-#: src/rec-int.c:369
+#: src/rec-int.c:370
 #, c-format
 msgid "%s:%s: error: confidential field is not encrypted\n"
 msgstr ""
 
-#: src/rec-int.c:421
+#: src/rec-int.c:422
 #, c-format
 msgid "%s:%s: error: key field '%s' not found in record\n"
 msgstr ""
 
-#: src/rec-int.c:430
+#: src/rec-int.c:431
 #, c-format
 msgid "%s:%s: error: multiple key fields '%s' in record\n"
 msgstr ""
 
-#: src/rec-int.c:473
+#: src/rec-int.c:474
 #, c-format
 msgid "%s:%s: error: duplicated key value in field '%s' in record\n"
 msgstr ""
 
-#: src/rec-int.c:561
+#: src/rec-int.c:562
 #, c-format
 msgid "%s:%s: error: duplicated value in singular field '%s' in record\n"
 msgstr ""
 
-#: src/rec-int.c:619
+#: src/rec-int.c:620
 #, c-format
 msgid "%s:%s: error: missing %%rec field in record descriptor\n"
 msgstr ""
 
-#: src/rec-int.c:627
+#: src/rec-int.c:628
 #, c-format
 msgid "%s:%s: error: too many %%rec fields in record descriptor\n"
 msgstr ""
 
-#: src/rec-int.c:637
+#: src/rec-int.c:638
 #, c-format
 msgid "%s:%s: error: invalid record type %s\n"
 msgstr ""
 
-#: src/rec-int.c:648
+#: src/rec-int.c:649
 #, c-format
 msgid "%s:%s: error: only one %%key field is allowed in a record descriptor\n"
 msgstr ""
 
-#: src/rec-int.c:658
+#: src/rec-int.c:659
 #, c-format
 msgid "%s:%s: error: only one %%size field is allowed in a record descriptor\n"
 msgstr ""
 
-#: src/rec-int.c:668
+#: src/rec-int.c:669
 #, c-format
 msgid "%s:%s: error: only one %%sort field is allowed in a record descriptor\n"
 msgstr ""
 
-#: src/rec-int.c:691
+#: src/rec-int.c:692
 #, c-format
 msgid ""
 "%s:%s: error: expected a comma-separated list of fields before the type "
 "specification\n"
 msgstr ""
 
-#: src/rec-int.c:717 src/rec-int.c:770
+#: src/rec-int.c:718 src/rec-int.c:771
 #, c-format
 msgid "%s:%s: error: the referred type %s does not exist\n"
 msgstr ""
 
-#: src/rec-int.c:729
+#: src/rec-int.c:730
 #, c-format
 msgid "%s:%s: error: invalid type specification\n"
 msgstr ""
 
-#: src/rec-int.c:744
+#: src/rec-int.c:745
 #, c-format
 msgid "%s:%s: error: expected a type name before the type specification\n"
 msgstr ""
 
-#: src/rec-int.c:782
+#: src/rec-int.c:783
 #, c-format
 msgid "%s:%s: error: invalid typedef specification\n"
 msgstr ""
 
-#: src/rec-int.c:804
+#: src/rec-int.c:805
 #, c-format
 msgid "%s:%s: error: value for %s[%zd] is not a valid selection expression\n"
 msgstr ""
 
-#: src/rec-int.c:835
+#: src/rec-int.c:836
 #, c-format
 msgid "%s:%s: error: value for %s[%zd] is not a list of field names\n"
 msgstr ""
 
-#: src/rec-int.c:848
+#: src/rec-int.c:849
 #, c-format
 msgid ""
 "%s:%s: error: value for %s should be a number optionally preceded by >, <, "
 ">= or <=.\n"
 msgstr ""
 
-#: src/rec-int.c:864
+#: src/rec-int.c:865
 #, c-format
 msgid "%s:%s: error: value for %s should be a list of field names.\n"
 msgstr ""
 
-#: src/rec-int.c:892
+#: src/rec-int.c:893
 #, c-format
 msgid ""
 "%s:%s: error: auto-incremented field %s should be of type int, range, uuid "
 "or date\n"
 msgstr ""
 
-#: src/rec-int.c:894
+#: src/rec-int.c:895
 #, c-format
 msgid ""
 "%s:%s: error: auto-incremented field %s should be of type int, range or "
 "date\n"
 msgstr ""
 
-#: src/rec-int.c:977
+#: src/rec-int.c:978
 #, c-format
 msgid "%s:%s: error: could not fetch remote descriptor from url %s.\n"
 msgstr ""
 
-#: src/rec-int.c:996
+#: src/rec-int.c:997
 #, c-format
 msgid "%s:%s: error: could not read external descriptor from file %s.\n"
 msgstr ""
 
-#: src/rec-int.c:1011
+#: src/rec-int.c:1012
 #, c-format
 msgid "%s:%s: error: %s does not contain valid rec data.\n"
 msgstr ""
 
-#: src/rec-int.c:1025
+#: src/rec-int.c:1026
 #, c-format
 msgid "%s:%s: error: %s does not contain information for type %s.\n"
 msgstr ""
 
-#: src/rec-int.c:1149
+#: src/rec-int.c:1150
 #, c-format
 msgid "%s: error: the number of records of type %s should be %zd.\n"
 msgstr ""
 
-#: src/rec-int.c:1159
+#: src/rec-int.c:1160
 #, c-format
 msgid "%s: error: too many records of type %s. Maximum allowed are %zd.\n"
 msgstr ""
 
-#: src/rec-int.c:1166
+#: src/rec-int.c:1167
 #, c-format
 msgid "%s: error: too few records of type %s. Minimum allowed are %zd.\n"
 msgstr ""
 
-#: src/rec-types.c:303
+#: src/rec-types.c:304
 msgid "invalid integer."
 msgstr ""
 
-#: src/rec-types.c:331
+#: src/rec-types.c:332
 msgid "invalid 'field' value."
 msgstr ""
 
-#: src/rec-types.c:352
+#: src/rec-types.c:353
 msgid "invalid 'uuid' value."
 msgstr ""
 
-#: src/rec-types.c:368
+#: src/rec-types.c:369
 msgid "invalid 'bool' value."
 msgstr ""
 
-#: src/rec-types.c:389
+#: src/rec-types.c:390
 msgid "invalid 'range' value."
 msgstr ""
 
-#: src/rec-types.c:398
+#: src/rec-types.c:399
 #, c-format
 msgid "expected an integer between %d and %d."
 msgstr ""
 
-#: src/rec-types.c:418
+#: src/rec-types.c:419
 msgid "invalid 'real' value."
 msgstr ""
 
-#: src/rec-types.c:435
+#: src/rec-types.c:436
 #, c-format
 msgid "value too large.  Expected a size <= %zu."
 msgstr ""
 
-#: src/rec-types.c:455
+#: src/rec-types.c:456
 msgid "invalid 'line' value."
 msgstr ""
 
-#: src/rec-types.c:472
+#: src/rec-types.c:473
 msgid "value does not match the regexp."
 msgstr ""
 
-#: src/rec-types.c:491
+#: src/rec-types.c:492
 msgid "invalid date."
 msgstr ""
 
-#: src/rec-types.c:505
+#: src/rec-types.c:506
 msgid "invalid email."
 msgstr ""
 
-#: src/rec-types.c:546
+#: src/rec-types.c:547
 msgid "invalid enum value."
 msgstr ""
 
-#: src/rec-types.c:897
+#: src/rec-types.c:898
 #, c-format
 msgid ""
 "internal error: rec-types: got REC_TYPE_NONE from rec_type_parse_type_kind() "
 "in rec_type_new().\n"
 msgstr ""
 
-#: src/rec-utils.c:85
+#: src/rec-utils.c:86
 #, c-format
 msgid "internal error: rec_int_rec_extract_file: error compiling regexp.\n"
 msgstr ""
 
-#: src/rec-utils.c:115 src/rec-utils.c:146
+#: src/rec-utils.c:116 src/rec-utils.c:147
 #, c-format
 msgid "internal error: rec_int_rec_extract_url: error compiling regexp.\n"
 msgstr ""
 
-#: src/rec-utils.c:289
+#: src/rec-utils.c:290
 #, c-format
 msgid "internal error: rec_match: error compiling regexp.\n"
 msgstr ""

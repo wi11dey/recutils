@@ -1,19 +1,22 @@
 This NEWS file records noteworthy changes, very tersely.
 See the manual for detailed information.
 
-  Copyright 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
-  2020, 2022 Jose E. Marchesi.
+  Copyright 2010-2022 Jose E. Marchesi.
 
   Copying and distribution of this file, with or without modification,
   are permitted in any medium without royalty provided the copyright
   notice and this notice are preserved.
 
- Version 1.8.90 (28 January 2019)
+ Version 1.9 (16 April 2022)
 * Utilities:
   . Fix bug preventing recins and recset to work when /tmp is
     in a different mount point.
   . Fix a segfault that occured when csv2rec was presented with
     invalid data.
+  . Fix long option name for -j/--join.
+* Format:
+  . New special field %singular to mark fields whose contents
+    must be unique in the containing record set.
 * librec:
   . Fix a segmentation fault when there are blank characters before
     the list of fields in %type fields.
@@ -21,6 +24,9 @@ See the manual for detailed information.
   . New manual chapter discussing the ob-rec.el major mode.
   . Do not claim that recins creates non-existent files.
 * Other fixes:
+  . CVE-2021-46019
+  . CVE-2021-46022
+  . CVE-2021-46022
   . gnulib updated.
 
  Version 1.8 (3 January 2019)
