@@ -179,20 +179,6 @@ AC_ARG_ENABLE([bash-builtins],
 AM_CONDITIONAL([BASH_BUILTINS],
                [test "x$bash_headers_available" = "xyes" && test "x$bash_builtins_enabled" = "xyes"])
 
-dnl Check for an Algol 68 compiler
-
-AC_ARG_ENABLE([algol68],
-              AS_HELP_STRING([--enable-algol68],
-                             [Build the bindings for Algol 68 (default is NO)]),
-              [algol68_enabled=$enableval], [algol68_enabled=no])
-
-if test "x$algol68_enabled" = "xyes"; then
-   AC_CHECK_PROGS([CA68], [ca68])
-fi
-
-AC_SUBST([CA68])
-AM_CONDITIONAL([BUILD_A68],[test -n "$CA68" && test "x$algol68_enabled" = "xyes"])
-
 dnl Platform-based compilation options
 compile_w32_system=no
 case "${host}" in
@@ -227,8 +213,7 @@ AC_CONFIG_FILES(Makefile
                 torture/utils/Makefile
                 torture/utils/config.sh
                 man/Makefile
-                etc/Makefile
-                algol68/Makefile)
+                etc/Makefile)
 AC_OUTPUT
 
 dnl Report warnings

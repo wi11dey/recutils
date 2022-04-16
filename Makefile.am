@@ -19,10 +19,6 @@
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = lib libcsv src utils bash doc po man torture etc
 
-if BUILD_A68
-   SUBDIRS += algol68
-endif
-
 perf:
 	$(MAKE) -C torture/utils perf
 
