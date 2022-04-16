@@ -1,5 +1,13 @@
 2022-04-16  Jose E. Marchesi  <jemarch@gnu.org>
 
+	CVE-2021-46019
+	CVE-2021-46022
+	CVE-2021-46022
+	* src/rec-parser.c (rec_parse_comment): Avoid 0xff being
+	interpreted as (int) -1.
+
+2022-04-16  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* configure.ac: Remove algol68 bindings support.
 	* Makefile.am: Remove algol68 from subdirs.
 	* algol68: Delete.

@@ -432,7 +432,7 @@ rec_parse_comment (rec_parser_t parser, rec_comment_t *comment)
                 c = '\n';
             }
 
-          if (rec_buf_putc (c, buf) == EOF)
+          if (rec_buf_putc (ci, buf) == EOF)
             {
               /* Out of memory */
               parser->error = REC_PARSER_ENOMEM;
