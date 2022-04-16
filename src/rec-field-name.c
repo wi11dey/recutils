@@ -49,7 +49,8 @@ static const char *fnames[] =
     "%typedef",
     "%unique",
     "%constraint",
-    "%allowed"
+    "%allowed",
+    "%singular",
   };
 
 const char *

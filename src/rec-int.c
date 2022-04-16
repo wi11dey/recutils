@@ -487,6 +487,89 @@ rec_int_check_record_key (rec_rset_t rset,
   return res;
 }
 
+static int
+rec_int_check_record_singular (rec_rset_t rset,
+                               rec_record_t orig_record,
+                               rec_record_t record,
+                               rec_buf_t errors)
+{
+  int res = 0;
+  rec_record_t descriptor;
+  size_t i;
+
+  descriptor = rec_rset_descriptor (rset);
+  if (!descriptor)
+    return 0;
+
+  for (i = 0;
+       i < rec_record_get_num_fields_by_name (descriptor,
+                                              FNAME (REC_FIELD_SINGULAR));
+       ++i)
+    {
+      size_t j;
+      bool duplicated_singular = false;
+      rec_field_t field = rec_record_get_field_by_name (descriptor,
+                                                        FNAME (REC_FIELD_SINGULAR), i);
+      char *singular_field_name = rec_parse_field_name_str (rec_field_value (field));
+
+      /* Ignore invalid %singular entries.  */
+      if (!singular_field_name)
+        continue;
+
+      /* Iterate over all the fields in the record having this name.  */
+      for (j = 0;
+           j < rec_record_get_num_fields_by_name (record, singular_field_name);
+           ++j)
+        {
+          /* Check that the value in this field is singular in the
+             whole record set.  */
+          rec_mset_iterator_t iter;
+          rec_record_t other_record;
+          rec_field_t orig_field = rec_record_get_field_by_name (record,
+                                                                 singular_field_name,
+                                                                 j);
+
+          iter = rec_mset_iterator (rec_rset_mset (rset));
+          while (rec_mset_iterator_next (&iter, MSET_RECORD, (const void**) &other_record, NULL))
+            {
+              size_t k;
+
+              for (k = 0;
+                   k < rec_record_get_num_fields_by_name (other_record,
+                                                          singular_field_name);
+                   ++k)
+                {
+                  rec_field_t f = rec_record_get_field_by_name (other_record,
+                                                                singular_field_name,
+                                                                k);
+                  if (other_record != orig_record
+                      && strcmp (rec_field_value (f),
+                                 rec_field_value (orig_field)) == 0)
+                                 
+                    {
+                      duplicated_singular = true;
+                      break;
+                    }
+                }
+            }
+          rec_mset_iterator_free (&iter);
+        }
+
+      if (duplicated_singular)
+        {
+          ADD_ERROR (errors,
+                     _("%s:%s: error: duplicated value in singular field '%s' in record\n"),
+                     rec_record_source (orig_record),
+                     rec_record_location_str (orig_record),
+                     singular_field_name);
+          res++;
+          break;
+        }
+    }
+
+  return res;
+}
+
 static bool
 rec_int_rec_type_p (const char *str)
 {
@@ -1123,7 +1206,8 @@ rec_int_check_record (rec_db_t db,
 #endif
     + rec_int_check_record_prohibit  (rset, record, errors)
     + rec_int_check_record_sex_constraints (rset, record, errors)
-    + rec_int_check_record_allowed   (rset, record, errors);
+    + rec_int_check_record_allowed   (rset, record, errors)
+    + rec_int_check_record_singular (rset, orig_record, record, errors);
 
   return res;
 }

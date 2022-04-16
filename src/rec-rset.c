@@ -1268,7 +1268,8 @@ rec_rset_rename_field (rec_rset_t rset,
 #if defined REC_CRYPT_SUPPORT
                    || rec_field_name_equal_p (rec_field_name (field), FNAME(REC_FIELD_CONFIDENTIAL))
 #endif
-                   || rec_field_name_equal_p (rec_field_name (field), FNAME(REC_FIELD_SORT)))
+                   || rec_field_name_equal_p (rec_field_name (field), FNAME(REC_FIELD_SORT))
+                   || rec_field_name_equal_p (rec_field_name (field), FNAME(REC_FIELD_SINGULAR)))
             {
               /* Rename the field in the fex expression that is the
                  value of the field.  Skip invalid entries.  */

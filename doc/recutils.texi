@@ -828,6 +828,8 @@ Restricting the size of your database.  @xref{Size Constraints}.
 Enforcing arbitrary constraints.  @xref{Arbitrary Constraints}.
 @item %confidential
 Storing confidential information.  @xref{Encryption}.
+@item %singular
+Fields without repeating values.
 @end table
 
 @node Querying Recfiles
@@ -2851,6 +2853,7 @@ structure of the records.
 * Prohibited Fields::        Forbidding the presence of fields.
 * Allowed Fields::           Restricting the presence of fields.
 * Keys and Unique Fields::   Fields characterizing records.
+* Singular Fields::          Fields with unique contents.
 * Size Constraints::         Constraints on the number of records in a set.
 * Arbitrary Constraints::    Constraints records must comply with.
 @end menu
@@ -3084,6 +3087,20 @@ violations, and will be reported by a checking tool.
 Elsewhere, we discuss how primary keys can be used to link one record set to 
 another using primary keys together with foreign keys. @xref{Queries which Join Records}.
 
+@node Singular Fields
+@section Singular Fields
+
+Sometimes we require certain fields with a given name to not appear in
+a record set featuring the same contents, but we don't want (or we
+can't) declare such fields as the key of the record set.
+
+In these circumstances we can use @dfn{singular fields}, which are
+declared as such in the record descriptor using the @code{%singular}
+special field:
+
+@example
+%singular: @var{field}
+@end example
 
 @node Size Constraints
 @section Size Constraints

@@ -1380,6 +1380,21 @@ zzz: 40
 yyy: 30
 '
 
+test_declare_input_file multiple-singulars \
+'%rec: Foo
+%singular: Id
+%unique: Id
+
+Id: 0
+Name: Name1
+
+Id: 2
+Name: Name2
+
+Id: 2
+Name: Name3
+'
+
 test_declare_input_file blanks-before-fex-in-type \
 '%rec: Bug
 %mandatory: Id Title Desc Status Reporter Time
@@ -2446,7 +2461,12 @@ test_tool recfix-blanks-before-fex-in-type ok \
           '--check' \
           blanks-before-fex-in-type \
           ''
-        
+
+test_tool recfix-multiple-singulars xfail \
+          recfix \
+          '--check' \
+          multiple-singulars
+
 #
 # Cleanup.
 #

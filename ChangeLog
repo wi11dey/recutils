@@ -1,3 +1,13 @@
+2022-04-16  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/rec.h (enum rec_std_field_e): New entry REC_FIELD_SINGULAR.
+	* src/rec-field-name.c (fnames): Add "singular".
+	* src/rec-rset.c (rec_rset_rename_field): Handle
+	REC_FIELD_SINGULAR.
+	* src/rec-int.c (rec_int_check_record_singular): Define.
+	* torture/utils/recfix.sh: New tests.
+	* doc/recutils.texi: Document singular fields.
+
 2022-01-20  Liliana Marie Prikler  <liliana.prikler@ist.tugraz.at>
 
 	* utils/recfmt.c (recfmt_apply_template): Add open brace as excluded
