@@ -98,9 +98,17 @@ field2: value32
 field3: value33
 '
 
+test_declare_input_file empty ''
+
 #
 # Declare tests.
 #
+
+test_tool recset-empty ok \
+          recset \
+          '' \
+          empty \
+          ''
 
 test_tool recset-append-field ok \
           recset \

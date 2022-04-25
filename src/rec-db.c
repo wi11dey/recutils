@@ -1431,7 +1431,7 @@ bool rec_db_set (rec_db_t    db,
       rset = rec_db_get_rset (db, 0);
 
   /* Don't process empty record sets.  */
-  if (rec_rset_num_records (rset) == 0)
+  if (!rset || rec_rset_num_records (rset) == 0)
     return true;
 
   /* If the user requested to manipulate random records then calculate
