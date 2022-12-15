@@ -25,7 +25,7 @@
 
 #include <rec-sex-parser.h>
 #include "rec-sex-tab.h"
-/*#include "rec-sex-lex.h" */
+#include "rec-sex-lex.h"
 
 struct rec_sex_parser_s
 {
