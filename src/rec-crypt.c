@@ -166,14 +166,20 @@ rec_decrypt (char   *in,
   if (((in_size - SALT_SIZE) % AESV2_BLKSIZE) == 0)
     salt_size = SALT_SIZE;
   else if ((in_size % AESV2_BLKSIZE) != 0)
-    return false;
+    {
+      printf ("input not a multiple of block size (%d)\n", AESV2_BLKSIZE);
+      return false;
+    }
 
   /* Create the handler.  */
   if (gcry_cipher_open (&handler,
                         GCRY_CIPHER_AES128,
                         GCRY_CIPHER_MODE_CBC,
                         0) != GPG_ERR_NO_ERROR)
-    return false;
+    {
+      printf ("could not open cipher\n");
+      return false;
+    }
 
   /* Set the key of the cypher.  */
   password_size = strlen (password);
@@ -198,6 +204,7 @@ rec_decrypt (char   *in,
   if (gcry_cipher_setiv (handler, iv, AESV2_BLKSIZE)
       != GPG_ERR_NO_ERROR)
     {
+      printf ("could not set cipher IV\n");
       gcry_cipher_close (handler);
       return false;
     }
@@ -212,6 +219,7 @@ rec_decrypt (char   *in,
                            in_size - salt_size) != 0)
     {
       /* Error.  */
+      printf ("error decrypting\n");
       gcry_cipher_close (handler);
       return false;
     }
@@ -230,6 +238,7 @@ rec_decrypt (char   *in,
 
       if (crc32 (*out, strlen(*out) - 4) != crc)
         {
+	  printf ("CRC does not match\n");
           gcry_cipher_close (handler);
           return false;
         }
@@ -238,6 +247,7 @@ rec_decrypt (char   *in,
     }
   else
     {
+      printf ("CRC does not exist\n");
       gcry_cipher_close (handler);
       return false;
     }
